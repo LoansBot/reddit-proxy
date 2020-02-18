@@ -52,4 +52,4 @@ class RevokeAuthEndpoint:
 
 
 def register_endpoints(arr, headers):
-    arr += [LoginEndpoint(headers)]
+    arr += [LoginEndpoint(headers), RevokeAuthEndpoint(headers)]

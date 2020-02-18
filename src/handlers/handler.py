@@ -10,5 +10,14 @@ class Handler:
 
     :param name: The unique identifier for this handler, in snake_case.
     """
-    def handle(data):
+    def handle(self, reddit, auth, data):
+        """Handle an event with the given data and return the result and status
+        code.
+
+        :param reddit: the Reddit instance
+        :param auth: The logged in users auth
+        :param data: The dict of arguments passed as "args" in the packet
+        :return status_code: The status code for the response
+        :return info: A dict containing additional information or None
+        """
         pass
