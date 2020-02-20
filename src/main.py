@@ -168,7 +168,18 @@ def main():
           'be used to initiate a clean shutdown.')
     print('Logs will not be sent to STDOUT until shutdown. Monitor the '
           'postgres log table to follow progress.')
-    handlers.manager.register_listeners(logger, amqp)
+    try:
+        handlers.manager.register_listeners(logger, amqp)
+    except:  # noqa: E722
+        print('register_listeners error')
+        traceback.print_exc()
+        try:
+            logger.exception(Level.ERROR)
+            logger.commit()
+        except:  # noqa: E722
+            print('Error while reporting error for register_listeners')
+            traceback.print_exc()
+        raise
 
 
 if __name__ == '__main__':
