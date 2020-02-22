@@ -19,6 +19,11 @@ management (staying logged in).
 - AMQP_PASSWORD: The password for the AMQP connection
 - AMQP_VHOST: The AMQP virtual host
 - AMQP_QUEUE: Which AMQP queue to listen on
+- MIN_TIME_BETWEEN_REQUESTS_S: The number of seconds between requests to reddit.
+- REDDIT_USERNAME: The username for reddit
+- REDDIT_PASSWORD: The password for reddit
+- REDDIT_CLIENT_ID: The client id for the app in reddit
+- REDDIT_CLIENT_SECRET: THe client secret for the app in redit
 
 ## Folder Structure
 
@@ -27,6 +32,8 @@ management (staying logged in).
 - handlers/: Contains the queue request handlers
 
 ## Packet Structure
+
+Requests
 
 ```json
 {
@@ -39,9 +46,20 @@ management (staying logged in).
     "style": {
         "2xx": { "operation": "copy" },
         "4xx": { "operation": "failure" },
-        "5xx": { "operation": "retry" }
+        "5xx": { "operation": "retry", "ignore_version": false }
     },
     "ignore_version": false
+}
+```
+
+Responses
+
+```json
+{
+    "uuid": "7c07f3c0-f62c-43a0-badc-ce89869547e2",
+    "type": "copy",
+    "status": 200,
+    "info": {}
 }
 ```
 

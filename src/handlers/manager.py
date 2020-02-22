@@ -5,10 +5,25 @@ import main
 import os
 import importlib
 import json
+from datetime import datetime, timedelta
+import time
+from auth import Auth
+from reddit import Reddit
 
 VALID_OPERATIONS = {'copy', 'success', 'failure', 'retry'}
 """The list of valid operations within the style part of a packet"""
 
+DEFAULT_STYLE = {
+    '2xx': { 'operation': 'copy', 'log_level': 'TRACE' },
+    '4xx': { 'operation': 'failure', 'log_level': 'WARN' },
+    '5xx': { 'operation': 'retry', 'log_level': 'WARN' }
+}
+"""The default style dict for responding to requests. Any missing info in the
+style array is fetched from here."""
+
+FALLBACK_STYLE = DEFAULT_STYLE['5xx']
+"""In the extremely unlikely event we get a status code not described in
+default style, we fall back to this style"""
 
 def register_listeners(logger, amqp):
     """Main entry point to this file. Finds all the handlers and then
@@ -28,11 +43,40 @@ def register_listeners(logger, amqp):
 def listen_with_handlers(logger, amqp, handlers):
     """Uses the specified list of handlers when subscribing to the appropriate
     queue"""
+    handlers_by_name = dict([(handler.name, handler) for handler in handlers])
     queue = os.environ['AMQP_QUEUE']
     response_queues = {}
+    last_processed_at = None
+    min_td_btwn_reqs = timedelta(seconds=float(os.environ['MIN_TIME_BETWEEN_REQUESTS_S']))
+
+    time_btwn_clean = timedelta(hours=1)
+    remember_td = timedelta(days=1)
+    last_cleaned_respqueues = datetime.now()
+
+    reddit = Reddit()
+    auth = None
+    min_time_to_expiry = timedelta(minutes=15)
+
 
     channel = amqp.channel()
-    for method_frame, properties, body_bytes in channel.consume(queue):
+    queue_obj = channel.queue_declare(queue)
+    for method_frame, properties, body_bytes in channel.consume(queue, inactivity_timeout=600):
+        if (datetime.now() - last_cleaned_respqueues) > time_btwn_clean:
+            last_cleaned_respqueues = datetime.now()
+            for k in list(handlers_by_name.keys()):
+                val = handlers_by_name[k]
+                time_since_seen = datetime.now() - val['last_seen_at']
+                if time_since_seen > remember_td:
+                    logger.print(
+                        Level.DEBUG,
+                        'Forgetting about response queue {} - last saw it {} ago',
+                        k, time_since_seen
+                    )
+                    del val[k]
+
+        if method_frame is None:
+            continue
+
         body_str = body.decode('utf-8')
         try:
             body = json.loads(body_s):
@@ -45,9 +89,144 @@ def listen_with_handlers(logger, amqp, handlers):
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
             continue
 
-        # TODO version checking etc, see readme
-        # TODO queue the response using response_queues
-        channel.basic_ack(method_frame.delivery_tag)
+        resp_info = response_queues.get(body['response_queue'])
+        if resp_info is None:
+            logger.print(
+                Level.DEBUG,
+                'New response queue {} detected at version {}',
+                body['response_queue'], resp_info['version_utc_seconds']
+            )
+            channel.queue_declare(body['response_queue'])
+            resp_info = {'version': body['version_utc_seconds']}
+            response_queues[body['response_queue']] = resp_info
+        elif not body['ignore_version'] and body['version_utc_seconds'] < resp_info['version_utc_seconds']:
+            logger.print(
+                Level.DEBUG,
+                'Ignoring message to response queue {} with type {}; specified version={} is below current version={}',
+                body['response_queue'], body['type'], body['version_utc_seconds'], resp_info['version_utc_seconds']
+            )
+            channel.basic_ack(method_frame.delivery_tag, requeue=False)
+            continue
+        elif body['version_utc_seconds'] > resp_info['version_utc_seconds']:
+            logger.print(
+                Level.DEBUG,
+                'Detected newer version for response queue {}, was {} and is now {}',
+                body['response_queue'], resp_info['version_utc_seconds'], body['version_utc_seconds']
+            )
+            resp_info['version'] = body['version_utc_seconds']
+
+        resp_info['last_seen_at'] = datetime.now()
+
+        if body['type'] not in handlers_by_name:
+            logger.print(
+                Level.WARN,
+                'Received request to response queue {} with an unknown type {}',
+                body['response_queue'], body['type']
+            )
+            channel.basic_nack(method_frame.delivery_tag, requeue=False)
+            continue
+
+        logger.print(
+            Level.TRACE,
+            'Processing request to response queue {} with type {}',
+            body['response_queue'], body['type']
+        )
+        if last_processed_at is not None and (datetime.now() - last_processed_at) < min_td_btwn_reqs:
+            req_sleep_time = min_td_btwn_reqs - (datetime.now() - last_processed_at)
+            time.sleep(req_sleep_time.total_seconds())
+
+        last_processed_at = datetime.now()
+
+        if auth is None or auth.expires_at < (datetime.now() - min_time_to_expiry):
+            auth = _auth(reddit, logger)
+            if auth is None:
+                channel.basic_nack(method_frame.delivery_tag, requeue=True)
+                continue
+
+        status, info = handlers_by_name[body['type']]
+        handle_style = _get_handle_style(body['style'], status)
+
+        logger.print(
+            getattr(handle_style['log_level']),
+            'Got status {} to response type {} for queue {} - handling with operation {}',
+            status, body['type'], body['response_queue'], handle_style['operation']
+        )
+
+        if handle_style['operation'] == 'copy':
+            channel.basic_publish('', body['response_queue'], {
+                'uuid': body['uuid'],
+                'type': 'copy',
+                'status': status,
+                'info': info
+            })
+            channel.basic_ack(method_frame.delivery_tag)
+        elif handle_style['operation'] == 'retry':
+            new_bod = body.copy()
+            new_bod['ignore_version'] = handle_style.get('ignore_version', False)
+            channel.basic_publish('', queue, new_bod)
+            channel.basic_nack(method_frame.delivery_tag, requeue=False)
+        elif handle_style['operation'] == 'success':
+            channel.basic_publish('', body['response_queue'], {
+                'uuid': body['uuid'],
+                'type': 'success'
+            })
+            channel.basic_ack(method_frame.delivery_tag)
+        else:
+            if handle_style['operation'] != 'failure':
+                logger.print(
+                    Level.WARN,
+                    'Unknown handle style {} to status {} to resposne queue {} for type {} - treating as failure',
+                    handle_style['operation'], status, body['response_queue'], body['type']
+                )
+            channel.basic_publish('', body['response_queue'], {
+                'uuid': body['uuid'],
+                'type': 'failure'
+            })
+            channel.basic_nack(method_frame.delivery_tag, requeue=False)
+
+
+def _auth(reddit, logger):
+    raw_resp = reddit.login(
+        os.environ['REDDIT_USERNAME'], os.environ['REDDIT_PASSWORD'],
+        os.environ['REDDIT_CLIENT_ID'], os.environ['REDDIT_CLIENT_SECRET']
+    )
+    if raw_resp.status_code < 200 or raw_resp.status_code > 299:
+        logger.print(
+            Level.WARN,
+            'Failed to login; got status code {}',
+            raw_resp.status_code
+        )
+        return None
+
+    logger.print(Level.DEBUG, 'Successfully relogged in')
+    return Auth.from_response(raw_resp)
+
+
+def _get_handle_style(style, status, defaults=DEFAULT_STYLE):
+    if style is None:
+        if defaults is None:
+            raise Exception('should not get here - no style or fallback')
+        return _get_handle_style(defaults, status, defaults=None)
+
+    best_match = None
+    if style.get(str(status)) is not None:
+        best_match = style[str(status)]
+    elif style.get(str(status)[0] + 'xx') is not None:
+        best_match = style[str(status)[0] + 'xx']
+
+    if best_match is None:
+        if defaults is None:
+            return FALLBACK_STYLE
+        return _get_handle_style(defaults, status, defaults=None)
+
+    if defaults is not None:
+        best_match = best_match.copy()
+        fill_with = _get_handle_style(style, status, defaults=None)
+        for k, v in fill_with.items():
+            if k not in best_match:
+                best_match[k] = v
+
+    return best_match
 
 
 def _detect_structure_errors_with_logging(logger, body_str, body):
