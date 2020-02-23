@@ -33,6 +33,7 @@ class Reddit:
 # this is pretty unlikely to break in the future. It seems much more probable
 # that something breaks makefun
 
+
 def _wrap_endpoint(endpoint):
     prms_arr_with_defaults = []
     prms_arr_no_defaults = []
@@ -61,10 +62,12 @@ def _wrap_endpoint(endpoint):
     wrapped.__doc__ = endpoint.make_request.__doc__
     return wrapped
 
+
 def _default_headers():
     return {
         'User-Agent': os.environ['USER_AGENT']
     }
+
 
 def _load_endpoints():
     headers = _default_headers()
@@ -84,11 +87,12 @@ def _load_endpoints():
         for f in files:
             if f.endswith('.py'):
                 mod_nm = mod_base + f[:-3]
-                mod = importlib.import_module(mod_base + f[:-3])
+                mod = importlib.import_module(mod_nm)
                 if hasattr(mod, 'register_endpoints'):
                     mod.register_endpoints(endpoints, headers)
 
     for e in endpoints:
         setattr(Reddit, e.name, _wrap_endpoint(e))
+
 
 _load_endpoints()

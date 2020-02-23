@@ -10,6 +10,7 @@ import time
 import sys
 import atexit
 import handlers.manager
+import signal
 
 
 shutdown_started = False
