@@ -279,7 +279,7 @@ def _detect_structure_errors_with_logging(logger, body_str, body):
                 try:
                     key_num = int(key)
                 except ValueError:
-                    key_num = -1 # we'll error out in a moment
+                    key_num = -1  # we'll error out in a moment
 
                 if key_num < 200 or key_num > 599:
                     logger.print(
@@ -347,14 +347,14 @@ def _detect_structure_errors_with_logging(logger, body_str, body):
             if operation == 'retry':
                 ignore_version = val.get('ignore_version')
                 if not isinstance(ignore_version, (type(None), bool)):
-                logger.print(
-                    Level.WARN,
-                    'Received malformed packet (response_queue={}, version_utc={}) '
-                    'style[\'{}\'][\'ignore_version\'] should be a bool or None, but '
-                    'got {}; body_str={}',
-                    resp_queue, vers_utc, key, type(ignore_version).__name__, body_str
-                )
-                return True
+                    logger.print(
+                        Level.WARN,
+                        'Received malformed packet (response_queue={}, version_utc={}) '
+                        'style[\'{}\'][\'ignore_version\'] should be a bool or None, but '
+                        'got {}; body_str={}',
+                        resp_queue, vers_utc, key, type(ignore_version).__name__, body_str
+                    )
+                    return True
 
     return False
 
