@@ -42,6 +42,7 @@ jobs:
         path: ./logging
     - name: Building working directory
       run: |
+        mkdir ./working
         mv ./reddit-proxy/src ./working/src
         mv ./reddit-proxy/tests ./working/tests
         mv ./reddit-proxy/cfg ./working/cfg
@@ -100,7 +101,7 @@ jobs:
         AMQP_VHOST: /
         AMQP_QUEUE: rproxy
         MIN_TIME_BETWEEN_REQUESTS_S: 2
-        REDDIT_USERNAME: ${{ secrets.REDdDIT_USERNAME }}
+        REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
         REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
         REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
