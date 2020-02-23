@@ -5,6 +5,7 @@ appends any handlers defined in that module to it (instances, not the classes
 themselves).
 """
 
+
 class Handler:
     """A standard handler.
 

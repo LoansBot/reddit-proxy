@@ -25,6 +25,7 @@ FALLBACK_STYLE = DEFAULT_STYLE['5xx']
 """In the extremely unlikely event we get a status code not described in
 default style, we fall back to this style"""
 
+
 def register_listeners(logger, amqp):
     """Main entry point to this file. Finds all the handlers and then
     subscribes to the appropriate queue with a callback which uses those
@@ -39,6 +40,7 @@ def register_listeners(logger, amqp):
     logger.connection.commit()
 
     listen_with_handlers(logger, amqp, handlers)
+
 
 def listen_with_handlers(logger, amqp, handlers):
     """Uses the specified list of handlers when subscribing to the appropriate
@@ -62,7 +64,6 @@ def listen_with_handlers(logger, amqp, handlers):
     auth = None
     min_time_to_expiry = timedelta(minutes=15)
 
-
     channel = amqp.channel()
     queue_obj = channel.queue_declare(queue)
     for method_frame, properties, body_bytes in channel.consume(queue, inactivity_timeout=600):
@@ -84,7 +85,7 @@ def listen_with_handlers(logger, amqp, handlers):
 
         body_str = body.decode('utf-8')
         try:
-            body = json.loads(body_s):
+            body = json.loads(body_s)
         except json.JSONDecodeError as exc:
             logger.exception(Level.WARN, 'Received non-json packet! Error info: doc={}, msg={}, pos={}, lineno={}, colno={}', exc.doc, exc.msg, exc.pos, exc.lineno, exc.colno)
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
@@ -136,8 +137,6 @@ def listen_with_handlers(logger, amqp, handlers):
             'Processing request to response queue {} with type {}',
             body['response_queue'], body['type']
         )
-        if
-
 
         if auth is None or auth.expires_at < (datetime.now() - min_time_to_expiry):
             delay_for_reddit()

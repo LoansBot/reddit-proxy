@@ -1,5 +1,6 @@
 """This module contains ping/pong handlers"""
 
+
 class PingHandler:
     """Responds with a success packet and no data."""
     def __init__(self):

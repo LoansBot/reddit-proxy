@@ -1,5 +1,6 @@
 """This module provides hooks to message-related endpoints"""
 
+
 class InboxHandler:
     """Handles requests of type "inbox". This accepts no arguments, only
     returns unread, and has the response format:
@@ -50,6 +51,7 @@ class InboxHandler:
                 )
 
         return result.status_code, { 'messages': messages, 'comments': comments }
+
 
 def register_handlers(handlers):
     handlers += [InboxHandler()]
