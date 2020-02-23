@@ -1,7 +1,6 @@
 """This module is responsible for detecting handlers within this package and
 forwarding the appropriate jobs to them.
 """
-import main
 import os
 import importlib
 import json
@@ -9,6 +8,8 @@ from datetime import datetime, timedelta
 import time
 from auth import Auth
 from reddit import Reddit
+from lblogging import Level
+
 
 VALID_OPERATIONS = {'copy', 'success', 'failure', 'retry'}
 """The list of valid operations within the style part of a packet"""
@@ -65,7 +66,7 @@ def listen_with_handlers(logger, amqp, handlers):
     min_time_to_expiry = timedelta(minutes=15)
 
     channel = amqp.channel()
-    queue_obj = channel.queue_declare(queue)
+    channel.queue_declare(queue)
     for method_frame, properties, body_bytes in channel.consume(queue, inactivity_timeout=600):
         if (datetime.now() - last_cleaned_respqueues) > time_btwn_clean:
             last_cleaned_respqueues = datetime.now()
@@ -83,9 +84,9 @@ def listen_with_handlers(logger, amqp, handlers):
         if method_frame is None:
             continue
 
-        body_str = body.decode('utf-8')
+        body_str = body_bytes.decode('utf-8')
         try:
-            body = json.loads(body_s)
+            body = json.loads(body_str)
         except json.JSONDecodeError as exc:
             logger.exception(Level.WARN, 'Received non-json packet! Error info: doc={}, msg={}, pos={}, lineno={}, colno={}', exc.doc, exc.msg, exc.pos, exc.lineno, exc.colno)
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
