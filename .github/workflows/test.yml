@@ -100,7 +100,7 @@ jobs:
         AMQP_VHOST: /
         AMQP_QUEUE: rproxy
         MIN_TIME_BETWEEN_REQUESTS_S: 2
-        REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+        REDDIT_USERNAME: ${{ secrets.REDdDIT_USERNAME }}
         REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
         REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
@@ -110,7 +110,7 @@ jobs:
         python -m unittest discover -s integration -p '*_test.py'
       env:
         AMQP_HOST: localhost
-        AMQP_PORT: ${{ jobs.services.rabbitmq.ports['5672'] }}
+        AMQP_PORT: ${{ job.services.rabbitmq.ports['5672'] }}
         AMQP_USERNAME: guest
         AMQP_PASSWORD: guest
         AMQP_VHOST: /
