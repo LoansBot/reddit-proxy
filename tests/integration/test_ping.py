@@ -50,8 +50,8 @@ class PingTest(unittest.TestCase):
                 'args': {}
             })
         )
-        for method_frame, properties, body_bytes in channel.consume(RESPONSE_QUEUE, inactivity_timeout=5):
-            channel.basic_ack(method_frame.delivery_tag)
+        for method_frame, properties, body_bytes in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=5):
+            self.channel.basic_ack(method_frame.delivery_tag)
             self.assertIsNotNone(method_frame)
             body = json.loads(body_bytes.decode('utf-8'))
             break
