@@ -17,6 +17,7 @@ class InboxHandler:
     """
     def __init__(self):
         self.name = 'inbox'
+        self.requires_delay = True
 
     def handle(self, reddit, auth, data):
         result = reddit.unread(25, None, None, auth)

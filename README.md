@@ -23,7 +23,7 @@ management (staying logged in).
 - REDDIT_USERNAME: The username for reddit
 - REDDIT_PASSWORD: The password for reddit
 - REDDIT_CLIENT_ID: The client id for the app in reddit
-- REDDIT_CLIENT_SECRET: THe client secret for the app in redit
+- REDDIT_CLIENT_SECRET: THe client secret for the app in reddit
 
 ## Folder Structure
 

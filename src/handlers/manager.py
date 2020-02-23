@@ -49,6 +49,11 @@ def listen_with_handlers(logger, amqp, handlers):
     last_processed_at = None
     min_td_btwn_reqs = timedelta(seconds=float(os.environ['MIN_TIME_BETWEEN_REQUESTS_S']))
 
+    def delay_for_reddit():
+        if last_processed_at is not None and (datetime.now() - last_processed_at) < min_td_btwn_reqs:
+            req_sleep_time = min_td_btwn_reqs - (datetime.now() - last_processed_at)
+            time.sleep(req_sleep_time.total_seconds())
+
     time_btwn_clean = timedelta(hours=1)
     remember_td = timedelta(days=1)
     last_cleaned_respqueues = datetime.now()
@@ -131,19 +136,23 @@ def listen_with_handlers(logger, amqp, handlers):
             'Processing request to response queue {} with type {}',
             body['response_queue'], body['type']
         )
-        if last_processed_at is not None and (datetime.now() - last_processed_at) < min_td_btwn_reqs:
-            req_sleep_time = min_td_btwn_reqs - (datetime.now() - last_processed_at)
-            time.sleep(req_sleep_time.total_seconds())
+        if
 
-        last_processed_at = datetime.now()
 
         if auth is None or auth.expires_at < (datetime.now() - min_time_to_expiry):
+            delay_for_reddit()
             auth = _auth(reddit, logger)
+            last_processed_at = datetime.now()
             if auth is None:
                 channel.basic_nack(method_frame.delivery_tag, requeue=True)
                 continue
 
-        status, info = handlers_by_name[body['type']]
+        handler = handlers_by_name[body['type']]
+        if handler.requires_delay:
+            delay_for_reddit()
+        status, info = handler.handle(reddit, auth, body['args'])
+        if handler.requires_delay:
+            last_processed_at = datetime.now()
         handle_style = _get_handle_style(body['style'], status)
 
         logger.print(
@@ -203,6 +212,11 @@ def _auth(reddit, logger):
 
 
 def _get_handle_style(style, status, defaults=DEFAULT_STYLE):
+    if status == 'success':
+        return { 'operation': 'success', 'log_level': 'TRACE' }
+    if status == 'failure':
+        return { 'operation': 'failure', 'log_level': 'TRACE' }
+
     if style is None:
         if defaults is None:
             raise Exception('should not get here - no style or fallback')
