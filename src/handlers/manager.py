@@ -362,12 +362,13 @@ def _detect_structure_errors_with_logging(logger, body_str, body):
 
 def _get_handlers(logger):
     handlers = []
-    localfile = os.path.abspath(os.path.dirname(__file__))
-    for root, dirs, files in os.walk(localfile):
+    for root, dirs, files in os.walk('handlers'):
         for f in files:
             if f.endswith('.py'):
-                relpath = os.path.abspath(os.path.join(root, f))[len(localfile):]
-                modnm = 'handlers.' + relpath.replace(os.path.sep, '.').replace('/', '.')[:-3]
+                relpath = os.path.join(root, f)
+                if relpath[0] == '.':
+                    relpath = relpath[2:]
+                modnm = relpath.replace(os.path.sep, '.').replace('/', '.')[:-3]
                 mod = importlib.import_module(modnm)
                 if hasattr(mod, 'register_handlers'):
                     logger.print(Level.TRACE, 'Loading handler {}', modnm)
