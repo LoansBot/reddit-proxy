@@ -366,7 +366,7 @@ def _get_handlers(logger):
         for f in files:
             if f.endswith('.py'):
                 modnm = os.path.join(root, f).replace(os.path.sep, '.').replace('/', '.')[:-3]
-                mod = importlib.import_module()
+                mod = importlib.import_module(modnm)
                 if hasattr(mod, 'register_handlers'):
                     logger.print(Level.TRACE, 'Loading handler {}', modnm)
                     mod.register_handlers(handlers)
