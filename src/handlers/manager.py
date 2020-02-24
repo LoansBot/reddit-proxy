@@ -380,5 +380,5 @@ def _get_handlers(logger):
                 if hasattr(mod, 'register_handlers'):
                     logger.print(Level.TRACE, 'Loading handler {}', modnm)
                     mod.register_handlers(handlers)
-    logger.commit()
+    logger.connection.commit()
     return handlers
