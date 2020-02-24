@@ -120,5 +120,10 @@ jobs:
     - name: Shutdown server
       if: always()
       run: |
+        echo "Program log:"
         cat working/src/program.log
+        echo "Supervisord log:"
+        cat working/src/supervisord.log
+        echo "Supervisord pid:"
+        cat working/src/supervisord.pid
         working/scripts/stop_server.sh
