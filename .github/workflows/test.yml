@@ -120,6 +120,12 @@ jobs:
     - name: Shutdown server
       if: always()
       run: |
+        echo "Listing .:"
+        ls .
+        echo "Listing working:"
+        ls working
+        echo "Listing working/src"
+        ls working/src
         echo "Program log:"
         cat working/src/program.log
         echo "Supervisord log:"
