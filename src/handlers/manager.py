@@ -159,7 +159,7 @@ def listen_with_handlers(logger, amqp, handlers):
         status, info = handler.handle(reddit, auth, body['args'])
         if handler.requires_delay:
             last_processed_at = datetime.now()
-        handle_style = _get_handle_style(body['style'], status)
+        handle_style = _get_handle_style(body.get('style'), status)
 
         logger.print(
             getattr(handle_style['log_level']),
