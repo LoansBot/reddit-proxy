@@ -162,7 +162,7 @@ def listen_with_handlers(logger, amqp, handlers):
         handle_style = _get_handle_style(body.get('style'), status)
 
         logger.print(
-            getattr(handle_style['log_level']),
+            getattr(Level, handle_style['log_level']),
             'Got status {} to response type {} for queue {} - handling with operation {}',
             status, body['type'], body['response_queue'], handle_style['operation']
         )
