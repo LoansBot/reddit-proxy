@@ -16,7 +16,7 @@ PIKA_PARAMETERS = pika.ConnectionParameters(
 )
 
 
-QUEUE = os.environ('AMQP_QUEUE')
+QUEUE = os.environ['AMQP_QUEUE']
 
 
 RESPONSE_QUEUE = 'ping_resp_queue'
