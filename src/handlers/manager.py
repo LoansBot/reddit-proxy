@@ -103,7 +103,7 @@ def listen_with_handlers(logger, amqp, handlers):
             logger.print(
                 Level.DEBUG,
                 'New response queue {} detected at version {}',
-                body['response_queue'], resp_info['version_utc_seconds']
+                body['response_queue'], body['version_utc_seconds']
             )
             channel.queue_declare(body['response_queue'])
             resp_info = {'version': body['version_utc_seconds']}
