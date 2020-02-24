@@ -120,4 +120,5 @@ jobs:
     - name: Shutdown server
       if: always()
       run: |
+        cat working/src/program.log
         working/scripts/stop_server.sh
