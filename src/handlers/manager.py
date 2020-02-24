@@ -80,6 +80,7 @@ def listen_with_handlers(logger, amqp, handlers):
                         k, time_since_seen
                     )
                     del val[k]
+            logger.connection.commit()
 
         if method_frame is None:
             continue
@@ -89,6 +90,7 @@ def listen_with_handlers(logger, amqp, handlers):
             body = json.loads(body_str)
         except json.JSONDecodeError as exc:
             logger.exception(Level.WARN, 'Received non-json packet! Error info: doc={}, msg={}, pos={}, lineno={}, colno={}', exc.doc, exc.msg, exc.pos, exc.lineno, exc.colno)
+            logger.connection.commit()
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
             continue
 
@@ -112,6 +114,7 @@ def listen_with_handlers(logger, amqp, handlers):
                 'Ignoring message to response queue {} with type {}; specified version={} is below current version={}',
                 body['response_queue'], body['type'], body['version_utc_seconds'], resp_info['version_utc_seconds']
             )
+            logger.connection.commit()
             channel.basic_ack(method_frame.delivery_tag, requeue=False)
             continue
         elif body['version_utc_seconds'] > resp_info['version_utc_seconds']:
@@ -122,6 +125,7 @@ def listen_with_handlers(logger, amqp, handlers):
             )
             resp_info['version'] = body['version_utc_seconds']
 
+        logger.connection.commit()
         resp_info['last_seen_at'] = datetime.now()
 
         if body['type'] not in handlers_by_name:
@@ -130,6 +134,7 @@ def listen_with_handlers(logger, amqp, handlers):
                 'Received request to response queue {} with an unknown type {}',
                 body['response_queue'], body['type']
             )
+            logger.connection.commit()
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
             continue
 
@@ -138,6 +143,7 @@ def listen_with_handlers(logger, amqp, handlers):
             'Processing request to response queue {} with type {}',
             body['response_queue'], body['type']
         )
+        logger.connection.commit()
 
         if auth is None or auth.expires_at < (datetime.now() - min_time_to_expiry):
             delay_for_reddit()
@@ -160,6 +166,7 @@ def listen_with_handlers(logger, amqp, handlers):
             'Got status {} to response type {} for queue {} - handling with operation {}',
             status, body['type'], body['response_queue'], handle_style['operation']
         )
+        logger.connection.commit()
 
         if handle_style['operation'] == 'copy':
             channel.basic_publish('', body['response_queue'], {
@@ -253,7 +260,7 @@ def _detect_structure_errors_with_logging(logger, body_str, body):
         return True
 
     vers_utc = body.get('version_utc_seconds')
-    if not isinstance(body.get(vers_utc), (int, float)):
+    if not isinstance(vers_utc, (int, float)):
         logger.print(
             Level.WARN,
             'Received malformed packet requesting a response to {} '
@@ -373,4 +380,5 @@ def _get_handlers(logger):
                 if hasattr(mod, 'register_handlers'):
                     logger.print(Level.TRACE, 'Loading handler {}', modnm)
                     mod.register_handlers(handlers)
+    logger.commit()
     return handlers
