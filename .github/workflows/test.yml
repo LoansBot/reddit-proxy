@@ -133,3 +133,9 @@ jobs:
       working-directory: working/src
       run: |
         python -m lblogging.query
+      env:
+        PGHOST: localhost
+        PGPORT: ${{ job.services.postgres.ports['5432'] }}
+        PGDATABASE: postgres
+        PGUSER: postgres
+        PGPASSWORD: dev
