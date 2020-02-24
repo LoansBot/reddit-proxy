@@ -120,4 +120,4 @@ jobs:
     - name: Shutdown server
       if: always()
       run: |
-        ../scripts/stop_server.sh
+        working/scripts/stop_server.sh
