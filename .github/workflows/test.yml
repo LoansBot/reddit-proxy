@@ -106,7 +106,7 @@ jobs:
         REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
         REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-        PYTHON_ARGS: -h
+        PYTHON_ARGS: -u
     - name: Run integration tests
       working-directory: ./working/tests
       run: |
