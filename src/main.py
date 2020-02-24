@@ -77,6 +77,7 @@ def main():
             print(f'Connecting to the AMQP server.. (attempt {attempt + 1}/5)')
             try:
                 amqp = pika.BlockingConnection(parameters)
+                break
             except pika.exceptions.AMQPConnectionError:
                 traceback.print_exc()
                 logger.exception(Level.WARN)
