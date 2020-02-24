@@ -169,23 +169,23 @@ def listen_with_handlers(logger, amqp, handlers):
         logger.connection.commit()
 
         if handle_style['operation'] == 'copy':
-            channel.basic_publish('', body['response_queue'], {
+            channel.basic_publish('', body['response_queue'], json.dumps({
                 'uuid': body['uuid'],
                 'type': 'copy',
                 'status': status,
                 'info': info
-            })
+            }))
             channel.basic_ack(method_frame.delivery_tag)
         elif handle_style['operation'] == 'retry':
             new_bod = body.copy()
             new_bod['ignore_version'] = handle_style.get('ignore_version', False)
-            channel.basic_publish('', queue, new_bod)
+            channel.basic_publish('', queue, json.dumps(new_bod))
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
         elif handle_style['operation'] == 'success':
-            channel.basic_publish('', body['response_queue'], {
+            channel.basic_publish('', body['response_queue'], json.dumps({
                 'uuid': body['uuid'],
                 'type': 'success'
-            })
+            }))
             channel.basic_ack(method_frame.delivery_tag)
         else:
             if handle_style['operation'] != 'failure':
@@ -194,10 +194,10 @@ def listen_with_handlers(logger, amqp, handlers):
                     'Unknown handle style {} to status {} to resposne queue {} for type {} - treating as failure',
                     handle_style['operation'], status, body['response_queue'], body['type']
                 )
-            channel.basic_publish('', body['response_queue'], {
+            channel.basic_publish('', body['response_queue'], json.dumps({
                 'uuid': body['uuid'],
                 'type': 'failure'
-            })
+            }))
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
 
 
