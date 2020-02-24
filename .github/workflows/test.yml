@@ -109,7 +109,7 @@ jobs:
     - name: Run integration tests
       working-directory: ./working/tests
       run: |
-        python -m unittest discover -s integration -p '*_test.py'
+        python -m unittest discover -s integration
       env:
         AMQP_HOST: localhost
         AMQP_PORT: ${{ job.services.rabbitmq.ports['5672'] }}
