@@ -76,7 +76,7 @@ class CommentsTest(unittest.TestCase):
         self.assertIsInstance(comment.get('body'), str)
         self.assertIsInstance(comment.get('author'), str)
         self.assertIsInstance(comment.get('link_fullname'), str)
-        self.assertEqual(comment['link_fullname'], 't3_')
+        self.assertEqual(comment['link_fullname'][:3], 't3_')
         self.assertEqual(comment.get('subreddit'), 'borrow')
         self.assertIsInstance(comment.get('created_utc'), (int, float))
         # we give some wiggle room because our clock might be off
