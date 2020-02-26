@@ -156,7 +156,18 @@ def listen_with_handlers(logger, amqp, handlers):
         handler = handlers_by_name[body['type']]
         if handler.requires_delay:
             delay_for_reddit()
-        status, info = handler.handle(reddit, auth, body['args'])
+        try:
+            status, info = handler.handle(reddit, auth, body['args'])
+        except:
+            logger.exception(
+                Level.WARN,
+                'An exception occurred while processing request to response '
+                'queue {} with type {}: body={}',
+                body['response_queue'], body['type'], body
+            )
+            status = 'failure'
+            info = None
+
         if handler.requires_delay:
             last_processed_at = datetime.now()
         handle_style = _get_handle_style(body.get('style'), status)
