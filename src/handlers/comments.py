@@ -48,6 +48,12 @@ class SubredditCommentsHandler:
                 }
             )
 
+        comments.sort(key=lambda c: -c['created_utc'])
+        if data.get('limit'):
+            limit = data['limit']
+            if len(comments) > limit:
+                comments = comments[:limit]
+
         return result.status_code, { 'comments': comments }
 
 
