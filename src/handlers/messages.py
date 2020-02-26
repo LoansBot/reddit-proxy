@@ -28,7 +28,9 @@ class InboxHandler:
         messages = []
         comments = []
 
-        for child in result['data']['children']:
+        body = result.json()
+
+        for child in body['data']['children']:
             if child['was_comment']:
                 comments.append(
                     {

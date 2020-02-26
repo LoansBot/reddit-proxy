@@ -33,7 +33,9 @@ class SubredditCommentsHandler:
 
         comments = []
 
-        for child in result['data']['children']:
+        body = result.json()
+
+        for child in body['data']['children']:
             comments.append(
                 {
                     'fullname': child['name'],
