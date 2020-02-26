@@ -60,9 +60,14 @@ class CommentsTest(unittest.TestCase):
             break
 
         self.assertIsInstance(body, dict)
-        self.assertIsInstance(body.get('comments'), list)
+        self.assertEqual(body.get('status'), 200)
+        self.assertEqual(body.get('type'), 'copy')
+        self.assertEqual(body.get('uuid'), 'subreddit-comments-uuid')
+        self.assertIsInstance(body.get('info'), dict)
+        info = body['info']
+        self.assertIsInstance(info.get('comments'), list)
 
-        comments = body['comments']
+        comments = info['comments']
         self.assertEqual(len(comments), 1)
         comment = comments[0]
         self.assertIsInstance(comment, dict)
