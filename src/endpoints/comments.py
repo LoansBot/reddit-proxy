@@ -1,4 +1,5 @@
 """Provides mappings for endpoints related to listings of comments"""
+import requests
 
 
 class SubredditCommentsListing:
@@ -22,9 +23,9 @@ class SubredditCommentsListing:
             data['limit'] = limit
         if after is not None:
             data['after'] = after
-        subreddit = '+'.join(subreddit)
+        subreddits = '+'.join(subreddits)
         return requests.get(
-            f'https://oauth.reddit.com/r/{subreddit}/comments',
+            f'https://oauth.reddit.com/r/{subreddits}/comments',
             headers = {**self.default_headers, **auth.get_auth_headers()},
             data = data
         )
