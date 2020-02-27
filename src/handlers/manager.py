@@ -15,9 +15,9 @@ VALID_OPERATIONS = {'copy', 'success', 'failure', 'retry'}
 """The list of valid operations within the style part of a packet"""
 
 DEFAULT_STYLE = {
-    '2xx': { 'operation': 'copy', 'log_level': 'TRACE' },
-    '4xx': { 'operation': 'failure', 'log_level': 'WARN' },
-    '5xx': { 'operation': 'retry', 'log_level': 'WARN' }
+    '2xx': {'operation': 'copy', 'log_level': 'TRACE'},
+    '4xx': {'operation': 'failure', 'log_level': 'WARN'},
+    '5xx': {'operation': 'retry', 'log_level': 'WARN'}
 }
 """The default style dict for responding to requests. Any missing info in the
 style array is fetched from here."""
@@ -89,7 +89,11 @@ def listen_with_handlers(logger, amqp, handlers):
         try:
             body = json.loads(body_str)
         except json.JSONDecodeError as exc:
-            logger.exception(Level.WARN, 'Received non-json packet! Error info: doc={}, msg={}, pos={}, lineno={}, colno={}', exc.doc, exc.msg, exc.pos, exc.lineno, exc.colno)
+            logger.exception(
+                Level.WARN,
+                'Received non-json packet! Error info: doc={}, msg={}, pos={}, lineno={}, colno={}',
+                exc.doc, exc.msg, exc.pos, exc.lineno, exc.colno
+            )
             logger.connection.commit()
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
             continue
@@ -108,7 +112,7 @@ def listen_with_handlers(logger, amqp, handlers):
             channel.queue_declare(body['response_queue'])
             resp_info = {'version': body['version_utc_seconds']}
             response_queues[body['response_queue']] = resp_info
-        elif not body['ignore_version'] and body['version_utc_seconds'] < resp_info['version_utc_seconds']:
+        elif not body.get('ignore_version') and body['version_utc_seconds'] < resp_info['version_utc_seconds']:
             logger.print(
                 Level.DEBUG,
                 'Ignoring message to response queue {} with type {}; specified version={} is below current version={}',
@@ -158,7 +162,7 @@ def listen_with_handlers(logger, amqp, handlers):
             delay_for_reddit()
         try:
             status, info = handler.handle(reddit, auth, body['args'])
-        except:
+        except:  # noqa: E722
             logger.exception(
                 Level.WARN,
                 'An exception occurred while processing request to response '
@@ -231,9 +235,9 @@ def _auth(reddit, logger):
 
 def _get_handle_style(style, status, defaults=DEFAULT_STYLE):
     if status == 'success':
-        return { 'operation': 'success', 'log_level': 'TRACE' }
+        return {'operation': 'success', 'log_level': 'TRACE'}
     if status == 'failure':
-        return { 'operation': 'failure', 'log_level': 'TRACE' }
+        return {'operation': 'failure', 'log_level': 'TRACE'}
 
     if style is None:
         if defaults is None:
@@ -280,7 +284,11 @@ def _detect_structure_errors_with_logging(logger, body_str, body):
         )
         return True
 
-    for key, types in [('type', str), ('uuid', str), ('sent_at', (int, float)), ('style', (dict, type(None))), ('ignore_version', (bool, type(None)))]:
+    simple_checks = [
+        ('type', str), ('uuid', str), ('sent_at', (int, float)),
+        ('style', (dict, type(None))), ('ignore_version', (bool, type(None)))
+    ]
+    for key, types in simple_checks:
         val = body.get(key)
         if not isinstance(val, types):
             logger.print(

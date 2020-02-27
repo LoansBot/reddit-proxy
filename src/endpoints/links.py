@@ -26,8 +26,8 @@ class SubredditLinksListing:
         subreddits = '+'.join(subreddits)
         return requests.get(
             f'https://oauth.reddit.com/r/{subreddits}/new',
-            headers = {**self.default_headers, **auth.get_auth_headers()},
-            data = data
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            data=data
         )
 
 

@@ -86,7 +86,7 @@ class SubredditLinksHandler:
                 else:
                     url.pop()
 
-        return result.status_code, { 'self': self_, 'url': url, 'after': after }
+        return result.status_code, {'self': self_, 'url': url, 'after': after}
 
 
 def register_handlers(handlers):

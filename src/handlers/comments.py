@@ -56,7 +56,7 @@ class SubredditCommentsHandler:
             if len(comments) > limit:
                 comments = comments[:limit]
 
-        return result.status_code, { 'comments': comments, 'after': after }
+        return result.status_code, {'comments': comments, 'after': after}
 
 
 def register_handlers(handlers):

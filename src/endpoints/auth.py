@@ -19,10 +19,10 @@ class LoginEndpoint:
         """
         return requests.post(
             'https://www.reddit.com/api/v1/access_token',
-            headers = {**self.default_headers, **{
+            headers={**self.default_headers, **{
                 'Authorization': 'Basic ' + b64encode((client_id + ':' + client_secret).encode('ascii')).decode('ascii')
             }},
-            data = {
+            data={
                 'grant_type': 'password',
                 'username': username,
                 'password': password
@@ -43,8 +43,8 @@ class RevokeAuthEndpoint:
         """
         return requests.post(
             'https://www.reddit.com/api/v1/revoke_token',
-            headers = self.default_headers,
-            data = {
+            headers=self.default_headers,
+            data={
                 'token': auth.access_token,
                 'token_type_hint': 'access_token'
             }

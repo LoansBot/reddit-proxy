@@ -26,8 +26,8 @@ class SubredditCommentsListing:
         subreddits = '+'.join(subreddits)
         return requests.get(
             f'https://oauth.reddit.com/r/{subreddits}/comments',
-            headers = {**self.default_headers, **auth.get_auth_headers()},
-            data = data
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            data=data
         )
 
 
