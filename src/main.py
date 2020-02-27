@@ -132,7 +132,7 @@ def main():
                         try:
                             logger.exception(Level.ERROR)
                             logger.connection.commit()
-                        except:
+                        except:  # noqa: E72
                             print('Failed to report exception to the logger, disabling logger and continuing shutdown')
                             traceback.print_exc()
                             reporting_errors = False

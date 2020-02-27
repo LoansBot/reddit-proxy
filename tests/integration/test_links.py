@@ -70,7 +70,7 @@ class LinksTest(unittest.TestCase):
         self.assertIsInstance(info.get('self'), list)
         self.assertIsInstance(info.get('url'), list)
 
-        self_ = body['self_']
+        self_ = body['self']
         url = body['url']
         self.assertEqual(len(self_) + len(url), 1)
 
@@ -128,7 +128,7 @@ class LinksTest(unittest.TestCase):
             print('got selftext on r/aww, skipping remaining linkpost tests')
             return
 
-        post = self_[0]
+        post = url[0]
         self.assertIsInstance(post.get('fullname'), str)
         self.assertEqual(post['fullname'][:3], 't3_')
         self.assertIsInstance(post.get('title'), str)
