@@ -19,7 +19,8 @@ class SubredditCommentsHandler:
                 "link_fullname": str,  "subreddit": str, "created_utc": float
             },
             ...
-        ]
+        ],
+        "after": str or None
     }
     """
     def __init__(self):
@@ -34,6 +35,7 @@ class SubredditCommentsHandler:
         comments = []
 
         body = result.json()
+        after = body['data'].get('after')
 
         for child in body['data']['children']:
             child = child['data']
@@ -54,7 +56,7 @@ class SubredditCommentsHandler:
             if len(comments) > limit:
                 comments = comments[:limit]
 
-        return result.status_code, { 'comments': comments }
+        return result.status_code, { 'comments': comments, 'after': after }
 
 
 def register_handlers(handlers):

@@ -65,6 +65,7 @@ class CommentsTest(unittest.TestCase):
         self.assertEqual(body.get('uuid'), 'subreddit-comments-uuid')
         self.assertIsInstance(body.get('info'), dict)
         info = body['info']
+        self.assertIsInstance(info.get("after"), (str, None))
         self.assertIsInstance(info.get('comments'), list)
 
         comments = info['comments']
