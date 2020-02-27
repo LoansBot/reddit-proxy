@@ -120,8 +120,8 @@ class LinksTest(unittest.TestCase):
         self.assertIsInstance(info.get('self'), list)
         self.assertIsInstance(info.get('url'), list)
 
-        self_ = body['self']
-        url = body['url']
+        self_ = info['self']
+        url = info['url']
         self.assertEqual(len(self_) + len(url), 1)
 
         if not url:

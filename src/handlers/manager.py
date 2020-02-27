@@ -112,20 +112,20 @@ def listen_with_handlers(logger, amqp, handlers):
             channel.queue_declare(body['response_queue'])
             resp_info = {'version': body['version_utc_seconds']}
             response_queues[body['response_queue']] = resp_info
-        elif not body.get('ignore_version') and body['version_utc_seconds'] < resp_info['version_utc_seconds']:
+        elif not body.get('ignore_version') and body['version_utc_seconds'] < resp_info['version']:
             logger.print(
                 Level.DEBUG,
                 'Ignoring message to response queue {} with type {}; specified version={} is below current version={}',
-                body['response_queue'], body['type'], body['version_utc_seconds'], resp_info['version_utc_seconds']
+                body['response_queue'], body['type'], body['version_utc_seconds'], resp_info['version']
             )
             logger.connection.commit()
             channel.basic_ack(method_frame.delivery_tag, requeue=False)
             continue
-        elif body['version_utc_seconds'] > resp_info['version_utc_seconds']:
+        elif body['version_utc_seconds'] > resp_info['version']:
             logger.print(
                 Level.DEBUG,
                 'Detected newer version for response queue {}, was {} and is now {}',
-                body['response_queue'], resp_info['version_utc_seconds'], body['version_utc_seconds']
+                body['response_queue'], resp_info['version'], body['version_utc_seconds']
             )
             resp_info['version'] = body['version_utc_seconds']
 
