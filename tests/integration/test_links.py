@@ -70,8 +70,8 @@ class LinksTest(unittest.TestCase):
         self.assertIsInstance(info.get('self'), list)
         self.assertIsInstance(info.get('url'), list)
 
-        self_ = body['self']
-        url = body['url']
+        self_ = info['self']
+        url = info['url']
         self.assertEqual(len(self_) + len(url), 1)
 
         if not self_:
@@ -135,7 +135,7 @@ class LinksTest(unittest.TestCase):
         self.assertIsInstance(post.get('url'), str)
         self.assertIsNone(post.get('body'))
         self.assertIsInstance(post.get('author'), str)
-        self.assertEqual(post.get('subreddit'), 'borrow')
+        self.assertEqual(post.get('subreddit'), 'aww')
         self.assertIsInstance(post.get('created_utc'), (int, float))
 
 
