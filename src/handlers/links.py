@@ -55,7 +55,7 @@ class SubredditLinksHandler:
 
             gen_info = {
                 'fullname': child['name'],
-                'title': child['title']
+                'title': child['title'],
                 'author': child['author'],
                 'subreddit': child['subreddit'],
                 'created_utc': child['created_utc']
@@ -71,7 +71,7 @@ class SubredditLinksHandler:
             else:
                 url.append(
                     {
-                        'url': child['url'],,
+                        'url': child['url'],
                         **gen_info
                     }
                 )
