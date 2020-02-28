@@ -28,7 +28,9 @@ class InboxHandler:
         messages = []
         comments = []
 
-        for child in result['data']['children']:
+        body = result.json()
+
+        for child in body['data']['children']:
             if child['was_comment']:
                 comments.append(
                     {
@@ -50,7 +52,7 @@ class InboxHandler:
                     }
                 )
 
-        return result.status_code, { 'messages': messages, 'comments': comments }
+        return result.status_code, {'messages': messages, 'comments': comments}
 
 
 def register_handlers(handlers):

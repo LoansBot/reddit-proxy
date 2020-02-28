@@ -7,7 +7,6 @@ import os
 import pika
 import traceback
 import time
-import sys
 import atexit
 import handlers.manager
 import signal
@@ -15,6 +14,7 @@ import signal
 
 shutdown_started = False
 shutdown_listeners = []
+_exit = os._exit
 
 
 def main():
@@ -44,7 +44,7 @@ def main():
             traceback.print_exc()
 
     if conn is None:
-        sys.exit(1)
+        _exit(1)
 
     print('Success! Initializing logger')
     logger = Logger(os.environ['APPNAME'], 'main.py', conn)
@@ -88,7 +88,7 @@ def main():
             conn.commit()
             logger.close()
             conn.close()
-            sys.exit(1)
+            _exit(1)
 
         logger.print(Level.INFO, 'Successfully connected to the AMQP server!')
         print('Setting up signal handlers...')
@@ -132,7 +132,7 @@ def main():
                         try:
                             logger.exception(Level.ERROR)
                             logger.connection.commit()
-                        except:
+                        except:  # noqa: E72
                             print('Failed to report exception to the logger, disabling logger and continuing shutdown')
                             traceback.print_exc()
                             reporting_errors = False
@@ -142,11 +142,11 @@ def main():
                 logger.connection.close()
                 amqp.close()
                 print('Cleaning up resources finished normally, exiting status 0')
-                sys.exit(0)
+                _exit(0)
             except:  # noqa: E722
                 print('Failed to successfully cleanup resources, exiting status 1')
                 traceback.print_exc()
-                sys.exit(1)
+                _exit(1)
 
         signal.signal(signal.SIGINT, receive_and_clean_shutdown)
         signal.signal(signal.SIGTERM, receive_and_clean_shutdown)
@@ -162,7 +162,7 @@ def main():
             traceback.print_exc()
         logger.close()
         conn.close()
-        sys.exit(1)
+        _exit(1)
 
     logger.print(Level.INFO, 'Initialization completed normally')
     conn.commit()

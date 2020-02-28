@@ -11,7 +11,7 @@ class Auth:
     scope: str
 
     def get_auth_headers(self):
-        return { 'Authorization': f'bearer {self.access_token}' }
+        return {'Authorization': f'bearer {self.access_token}'}
 
     @classmethod
     def from_response(cls, resp):

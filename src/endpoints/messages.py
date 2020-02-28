@@ -28,8 +28,8 @@ class UnreadEndpoint:
             data['before'] = before
         return requests.get(
             'https://oauth.reddit.com/api/message/unread',
-            headers = {**self.default_headers, **auth.get_auth_headers()},
-            data = data
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            data=data
         )
 
 
