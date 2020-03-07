@@ -1,8 +1,19 @@
 version: 0.2
 
+phases:
+  install:
+    pre_build:
+      run-as: root
+      commands:
+        - yum -y update
+        - yum -y install git
+        - git clone --depth 1 https://github.com/LoansBot/logging.git
+        - mv logging/requirements.txt logging/logging-requirements.txt
 artifacts:
   files:
      - src/**/*
+     - logging/src/**/*
+     - logging/logging-requirements.txt
      - requirements.txt
      - scripts/**/*
      - appspec.yml

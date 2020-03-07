@@ -3,6 +3,10 @@ os: linux
 files:
   - source: src
     destination: /webapps/reddit-proxy/src
+  - source: logging/src/lblogging
+    destination: /webapps/reddit-proxy/src/lblogging
+  - source: logging/logging-requirements.txt
+    destination: /webapps/reddit-proxy
   - source: requirements.txt
     destination: /webapps/reddit-proxy
   - source: scripts
