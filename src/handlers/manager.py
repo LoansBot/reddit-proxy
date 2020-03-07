@@ -70,8 +70,8 @@ def listen_with_handlers(logger, amqp, handlers):
     for method_frame, properties, body_bytes in channel.consume(queue, inactivity_timeout=600):
         if (datetime.now() - last_cleaned_respqueues) > time_btwn_clean:
             last_cleaned_respqueues = datetime.now()
-            for k in list(handlers_by_name.keys()):
-                val = handlers_by_name[k]
+            for k in list(response_queues.keys()):
+                val = response_queues[k]
                 time_since_seen = datetime.now() - val['last_seen_at']
                 if time_since_seen > remember_td:
                     logger.print(
