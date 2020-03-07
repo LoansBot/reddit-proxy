@@ -85,7 +85,7 @@ jobs:
       run: |
         python -m pip install supervisor
         supervisord -c ../cfg/supervisor.conf
-        ../scripts/startup_server.sh
+        supervisorctl start all
         supervisorctl status all
       env:
         USER_AGENT: LoansBot/reddit-proxy tests by /u/Tjstretchalot
@@ -121,7 +121,7 @@ jobs:
     - name: Shutdown server
       if: always()
       run: |
-        working/scripts/stop_server.sh
+        supervisorctl stop all
         echo "Program log:"
         cat working/src/program.log
         echo "Supervisord log:"
