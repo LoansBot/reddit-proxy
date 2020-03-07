@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-supervisorctl stop all
+/usr/local/bin/supervisorctl stop all || :

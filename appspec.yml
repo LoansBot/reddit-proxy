@@ -1,0 +1,28 @@
+version: 0.0
+os: linux
+files:
+  - source: src
+    destination: /webapps/reddit-proxy/src
+  - source: logging/src/lblogging
+    destination: /webapps/reddit-proxy/src/lblogging
+  - source: logging/logging-requirements.txt
+    destination: /webapps/reddit-proxy
+  - source: requirements.txt
+    destination: /webapps/reddit-proxy
+  - source: scripts
+    destination: /webapps/reddit-proxy/scripts
+  - source: cfg
+    destination: /webapps/reddit-proxy/cfg
+hooks:
+  BeforeInstall:
+    - location: scripts/before_install.sh
+      timeout: 180
+  AfterInstall:
+    - location:  scripts/after_install.sh
+      timeout: 180
+  ApplicationStart:
+    - location: scripts/startup_server.sh
+      timeout: 180
+  ApplicationStop:
+    - location: scripts/stop_server.sh
+      timeout: 180
