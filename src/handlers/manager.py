@@ -119,7 +119,7 @@ def listen_with_handlers(logger, amqp, handlers):
                 body['response_queue'], body['type'], body['version_utc_seconds'], resp_info['version']
             )
             logger.connection.commit()
-            channel.basic_ack(method_frame.delivery_tag, requeue=False)
+            channel.basic_nack(method_frame.delivery_tag, requeue=False)
             continue
         elif body['version_utc_seconds'] > resp_info['version']:
             logger.print(
