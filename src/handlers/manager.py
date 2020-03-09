@@ -101,6 +101,7 @@ def listen_with_handlers(logger, amqp, handlers):
             continue
 
         if _detect_structure_errors_with_logging(logger, body_str, body):
+            logger.connection.commit()
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
             continue
 
