@@ -53,7 +53,8 @@ def listen_with_handlers(logger, amqp, handlers):
     min_td_btwn_reqs = timedelta(seconds=float(os.environ['MIN_TIME_BETWEEN_REQUESTS_S']))
 
     def delay_for_reddit():
-        if last_processed_at is not None and (datetime.now() - last_processed_at) < min_td_btwn_reqs:
+        if (last_processed_at is not None
+                and (datetime.now() - last_processed_at) < min_td_btwn_reqs):
             req_sleep_time = min_td_btwn_reqs - (datetime.now() - last_processed_at)
             time.sleep(req_sleep_time.total_seconds())
 
@@ -118,8 +119,10 @@ def listen_with_handlers(logger, amqp, handlers):
         elif not body.get('ignore_version') and body['version_utc_seconds'] < resp_info['version']:
             logger.print(
                 Level.DEBUG,
-                'Ignoring message to response queue {} with type {}; specified version={} is below current version={}',
-                body['response_queue'], body['type'], body['version_utc_seconds'], resp_info['version']
+                'Ignoring message to response queue {} with type {}; '
+                'specified version={} is below current version={}',
+                body['response_queue'], body['type'], body['version_utc_seconds'],
+                resp_info['version']
             )
             logger.connection.commit()
             channel.basic_nack(method_frame.delivery_tag, requeue=False)
@@ -147,16 +150,27 @@ def listen_with_handlers(logger, amqp, handlers):
 
         logger.print(
             Level.TRACE,
-            'Processing request to response queue {} with type {}',
-            body['response_queue'], body['type']
+            'Processing request to response queue {} with type {} ({})',
+            body['response_queue'], body['type'], body['uuid']
         )
         logger.connection.commit()
 
         if auth is None or auth.expires_at < (datetime.now() - min_time_to_expiry):
+            logger.print(
+                Level.TRACE,
+                'Reauthenticating with reddit (expires at {})',
+                auth.expires_at if auth is not None else 'None'
+            )
+            logger.connection.commit()
             delay_for_reddit()
             auth = _auth(reddit, logger)
             last_processed_at = datetime.now()
             if auth is None:
+                logger.print(
+                    Level.WARN,
+                    'Failed to authenticate with reddit! Will nack, requeue=True'
+                )
+                logger.connection.commit()
                 channel.basic_nack(method_frame.delivery_tag, requeue=True)
                 continue
 
@@ -181,8 +195,8 @@ def listen_with_handlers(logger, amqp, handlers):
 
         logger.print(
             getattr(Level, handle_style['log_level']),
-            'Got status {} to response type {} for queue {} - handling with operation {}',
-            status, body['type'], body['response_queue'], handle_style['operation']
+            'Got status {} to response type {} for queue {} ({}) - handling with operation {}',
+            status, body['type'], body['response_queue'], body['uuid'], handle_style['operation']
         )
         logger.connection.commit()
 
@@ -209,7 +223,8 @@ def listen_with_handlers(logger, amqp, handlers):
             if handle_style['operation'] != 'failure':
                 logger.print(
                     Level.WARN,
-                    'Unknown handle style {} to status {} to resposne queue {} for type {} - treating as failure',
+                    'Unknown handle style {} to status {} to resposne queue {} for type {}'
+                    ' - treating as failure',
                     handle_style['operation'], status, body['response_queue'], body['type']
                 )
             channel.basic_publish('', body['response_queue'], json.dumps({
@@ -273,8 +288,12 @@ def _detect_structure_errors_with_logging(logger, body_str, body):
     # to make tracking down the source easier
     resp_queue = body.get('response_queue')
     if not isinstance(resp_queue, str):
-        logger.print(Level.WARN, 'Received malformed packet {} (response_queue has type {} instead of str)',
-                     body_str, type(resp_queue).__name__)
+        logger.print(
+            Level.WARN,
+            'Received malformed packet {} '
+            '(response_queue has type {} instead of str)',
+            body_str, type(resp_queue).__name__
+        )
         return True
 
     vers_utc = body.get('version_utc_seconds')
