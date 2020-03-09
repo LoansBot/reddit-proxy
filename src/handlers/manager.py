@@ -83,6 +83,8 @@ def listen_with_handlers(logger, amqp, handlers):
             logger.connection.commit()
 
         if method_frame is None:
+            logger.print(Level.TRACE, 'No messages in the last 10 minutes')
+            logger.connection.commit()
             continue
 
         body_str = body_bytes.decode('utf-8')
