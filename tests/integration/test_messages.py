@@ -37,35 +37,14 @@ class CommentsTest(unittest.TestCase):
         cls.channel.close()
         cls.amqp.close()
 
-    def test_compose_and_read(self):
-        self.channel.basic_publish(
-            '',
-            QUEUE,
-            json.dumps({
-                'type': 'mark_all_read',
-                'response_queue': RESPONSE_QUEUE,
-                'uuid': 'test_messages_A_uuid',
-                'version_utc_seconds': 1,
-                'sent_at': time.time(),
-                'args': {}
-            })
-        )
-        body = helper.fetch_one(self, RESPONSE_QUEUE)
-        self.assertEqual(
-            body,
-            {
-                'uuid': 'test_messages_A_uuid',
-                'type': 'success'
-            }
-        )
-
+    def test_compose(self):
         self.channel.basic_publish(
             '',
             QUEUE,
             json.dumps({
                 'type': 'compose',
                 'response_queue': RESPONSE_QUEUE,
-                'uuid': 'test_messages_B_uuid',
+                'uuid': 'test_messages_A_uuid',
                 'version_utc_seconds': 1,
                 'sent_at': time.time(),
                 'args': {
@@ -84,13 +63,14 @@ class CommentsTest(unittest.TestCase):
             }
         )
 
+    def test_read(self):
         self.channel.basic_publish(
             '',
             QUEUE,
             json.dumps({
                 'type': 'inbox',
                 'response_queue': RESPONSE_QUEUE,
-                'uuid': 'test_messages_C_uuid',
+                'uuid': 'test_messages_B_uuid',
                 'version_utc_seconds': 1,
                 'sent_at': time.time(),
                 'args': {}
@@ -104,9 +84,7 @@ class CommentsTest(unittest.TestCase):
         info = body['info']
         self.assertIsInstance(info.get('messages'), list)
         self.assertIsInstance(info.get('comments'), list)
-        self.assertNotEqual(len(info['messages']), 0)
 
-        found_me = False
         for msg in info['messages']:
             self.assertIsInstance(msg.get('fullname'), str)
             self.assertIsInstance(msg.get('subject'), str)
@@ -114,11 +92,27 @@ class CommentsTest(unittest.TestCase):
             self.assertIsInstance(msg.get('author'), str)
             self.assertIsInstance(msg.get('created_utc'), float)
 
-            found_me = found_me or (
-                msg['subject'] == 'messages'
-                and msg['body'] == 'This is a test with *markdown*'
-            )
-        self.assertTrue(found_me, json.dumps(info))
+    def test_mark_all_read(self):
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'mark_all_read',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'test_messages_C_uuid',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {}
+            })
+        )
+        body = helper.fetch_one(self, RESPONSE_QUEUE)
+        self.assertEqual(
+            body,
+            {
+                'uuid': 'test_messages_A_uuid',
+                'type': 'success'
+            }
+        )
 
 
 if __name__ == '__main__':
