@@ -27,7 +27,7 @@ class UnreadEndpoint:
         if before is not None:
             data['before'] = before
         return requests.get(
-            'https://oauth.reddit.com/api/message/unread',
+            'https://oauth.reddit.com/message/unread',
             headers={**self.default_headers, **auth.get_auth_headers()},
             data=data
         )
