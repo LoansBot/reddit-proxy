@@ -58,7 +58,7 @@ class CommentsTest(unittest.TestCase):
         self.assertEqual(
             body,
             {
-                'uuid': 'test_messages_B_uuid',
+                'uuid': 'test_messages_A_uuid',
                 'type': 'success'
             }
         )
@@ -78,7 +78,7 @@ class CommentsTest(unittest.TestCase):
         )
         body = helper.fetch_one(self, RESPONSE_QUEUE)
 
-        self.assertEqual(body.get('uuid'), 'test_messages_C_uuid')
+        self.assertEqual(body.get('uuid'), 'test_messages_B_uuid')
         self.assertEqual(body.get('type'), 'copy')
         self.assertIsInstance(body.get('info'), dict)
         info = body['info']
@@ -109,7 +109,7 @@ class CommentsTest(unittest.TestCase):
         self.assertEqual(
             body,
             {
-                'uuid': 'test_messages_A_uuid',
+                'uuid': 'test_messages_C_uuid',
                 'type': 'success'
             }
         )
