@@ -4,7 +4,7 @@ import os
 import pika
 import json
 import time
-from . import helper
+import helper
 
 PIKA_PARAMETERS = pika.ConnectionParameters(
     os.environ['AMQP_HOST'],
