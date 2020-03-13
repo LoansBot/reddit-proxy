@@ -33,5 +33,29 @@ class UnreadEndpoint:
         )
 
 
+class ComposeEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'compose'
+        self.default_headers = default_headers
+
+    def make_request(self, recipient, subject, body, auth):
+        """Sends a request to the given recipient which has the given title
+        and body. The body may be formatted with markdown.
+
+        :param recipient: The string recipient, typically /u/uname or /r/sub
+        :param subject: The string subject to send, shorter is better
+        :param body: The body in markdown format
+        """
+        return requests.post(
+            f'https://oauth.reddit.com/api/compose',
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            json={
+                'subject': subject,
+                'text': body,
+                'to': recipient
+            }
+        )
+
+
 def register_endpoints(arr, headers):
-    arr += [UnreadEndpoint(headers)]
+    arr += [UnreadEndpoint(headers), ComposeEndpoint(headers)]

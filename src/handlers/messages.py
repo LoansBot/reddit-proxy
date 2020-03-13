@@ -1,4 +1,5 @@
 """This module provides hooks to message-related endpoints"""
+import pytypeutils as tus
 
 
 class InboxHandler:
@@ -11,7 +12,13 @@ class InboxHandler:
             ...
         ],
         "comments": [
-            { "fullname": str, "body": str, "author": str,  "subreddit": str, "created_utc": float },
+            {
+                "fullname": str,
+                "body": str,
+                "author": str,
+                "subreddit": str,
+                "created_utc": float
+            },
             ...
         ]
     }
@@ -53,6 +60,32 @@ class InboxHandler:
                 )
 
         return result.status_code, {'messages': messages, 'comments': comments}
+
+
+class ComposeHandler:
+    """Handles requests of type "compose". This accepts 3 arguments - the
+    recipient, the subject of the message, and the body of the message. The
+    response is either a non-200 status code or success
+    """
+    def __init__(self):
+        self.name = 'compose'
+        self.requires_delay = True
+
+    def handle(self, reddit, auth, data):
+        recipient = data.get('recipient')
+        subject = data.get('subject')
+        body = data.get('body')
+
+        tus.check(
+            recipient=(recipient, str),
+            subject=(subject, str),
+            body=(body, str)
+        )
+
+        result = reddit.compose(recipient, subject, body, auth)
+        if result.status_code > 299:
+            return result.status_code, None
+        return 'success', None
 
 
 def register_handlers(handlers):
