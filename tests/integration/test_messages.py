@@ -100,7 +100,7 @@ class CommentsTest(unittest.TestCase):
 
         self.assertEqual(body.get('uuid'), 'test_messages_C_uuid')
         self.assertEqual(body.get('type'), 'copy')
-        self.assertIsInstnace(body.get('info'), dict)
+        self.assertIsInstance(body.get('info'), dict)
         info = body['info']
         self.assertIsInstance(info.get('messages'), list)
         self.assertIsInstance(info.get('comments'), list)
