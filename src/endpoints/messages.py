@@ -57,5 +57,22 @@ class ComposeEndpoint:
         )
 
 
+class MarkAllReadEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'mark_all_read'
+        self.default_headers = default_headers
+
+    def make_request(self, auth):
+        """Marks the entire inbox as read."""
+        return requests.post(
+            f'https://oauth.reddit.com/api/read_all_messages',
+            headers={**self.default_headers, **auth.get_auth_headers()},
+        )
+
+
 def register_endpoints(arr, headers):
-    arr += [UnreadEndpoint(headers), ComposeEndpoint(headers)]
+    arr += [
+        UnreadEndpoint(headers),
+        ComposeEndpoint(headers),
+        MarkAllReadEndpoint(headers)
+    ]

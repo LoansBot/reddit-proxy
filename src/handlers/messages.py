@@ -88,5 +88,24 @@ class ComposeHandler:
         return 'success', None
 
 
+class MarkAllReadHandler:
+    """Handles requests of the type "mark_all_read". Makrs the entire inbox
+    as read. This returns either a non-200 status code or success.
+    """
+    def __init__(self):
+        self.name = 'mark_all_read'
+        self.requires_delay = True
+
+    def handle(self, reddit, auth, data):
+        result = reddit.mark_all_read(auth)
+        if result.status_code > 299:
+            return result.status_code, None
+        return 'success', None
+
+
 def register_handlers(handlers):
-    handlers += [InboxHandler()]
+    handlers += [
+        InboxHandler(),
+        ComposeHandler(),
+        MarkAllReadHandler()
+    ]
