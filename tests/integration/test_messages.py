@@ -50,7 +50,7 @@ class CommentsTest(unittest.TestCase):
                 'args': {}
             })
         )
-        body = helper.fetch_one(RESPONSE_QUEUE)
+        body = helper.fetch_one(self, RESPONSE_QUEUE)
         self.assertEqual(
             body,
             {
@@ -75,7 +75,7 @@ class CommentsTest(unittest.TestCase):
                 }
             })
         )
-        body = helper.fetch_one(RESPONSE_QUEUE)
+        body = helper.fetch_one(self, RESPONSE_QUEUE)
         self.assertEqual(
             body,
             {
@@ -96,7 +96,7 @@ class CommentsTest(unittest.TestCase):
                 'args': {}
             })
         )
-        body = helper.fetch_one(RESPONSE_QUEUE)
+        body = helper.fetch_one(self, RESPONSE_QUEUE)
 
         self.assertEqual(body.get('uuid'), 'test_messages_C_uuid')
         self.assertEqual(body.get('type'), 'copy')
