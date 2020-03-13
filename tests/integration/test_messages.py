@@ -19,7 +19,7 @@ PIKA_PARAMETERS = pika.ConnectionParameters(
 QUEUE = os.environ['AMQP_QUEUE']
 
 
-RESPONSE_QUEUE = 'subreddit_comments_resp_queue'
+RESPONSE_QUEUE = 'test_messages_resp_queue'
 
 
 class CommentsTest(unittest.TestCase):
@@ -37,7 +37,7 @@ class CommentsTest(unittest.TestCase):
         cls.channel.close()
         cls.amqp.close()
 
-    def test_fetch_compose_and_read(self):
+    def test_compose_and_read(self):
         self.channel.basic_publish(
             '',
             QUEUE,
@@ -88,7 +88,7 @@ class CommentsTest(unittest.TestCase):
             '',
             QUEUE,
             json.dumps({
-                'type': 'unread',
+                'type': 'inbox',
                 'response_queue': RESPONSE_QUEUE,
                 'uuid': 'test_messages_C_uuid',
                 'version_utc_seconds': 1,
