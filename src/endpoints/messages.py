@@ -27,11 +27,52 @@ class UnreadEndpoint:
         if before is not None:
             data['before'] = before
         return requests.get(
-            'https://oauth.reddit.com/api/message/unread',
+            'https://oauth.reddit.com/message/unread',
             headers={**self.default_headers, **auth.get_auth_headers()},
             data=data
         )
 
 
+class ComposeEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'compose'
+        self.default_headers = default_headers
+
+    def make_request(self, recipient, subject, body, auth):
+        """Sends a request to the given recipient which has the given title
+        and body. The body may be formatted with markdown.
+
+        :param recipient: The string recipient, typically /u/uname or /r/sub
+        :param subject: The string subject to send, shorter is better
+        :param body: The body in markdown format
+        """
+        return requests.post(
+            f'https://oauth.reddit.com/api/compose',
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            json={
+                'subject': subject,
+                'text': body,
+                'to': recipient
+            }
+        )
+
+
+class MarkAllReadEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'mark_all_read'
+        self.default_headers = default_headers
+
+    def make_request(self, auth):
+        """Marks the entire inbox as read."""
+        return requests.post(
+            f'https://oauth.reddit.com/api/read_all_messages',
+            headers={**self.default_headers, **auth.get_auth_headers()},
+        )
+
+
 def register_endpoints(arr, headers):
-    arr += [UnreadEndpoint(headers)]
+    arr += [
+        UnreadEndpoint(headers),
+        ComposeEndpoint(headers),
+        MarkAllReadEndpoint(headers)
+    ]
