@@ -1,6 +1,7 @@
 """Contains utility functions for tests"""
 import json
 
+
 def fetch_one(self, queue):
     """Fetch one message from the given queue"""
     for method_frame, properties, body_bytes in self.channel.consume(queue, inactivity_timeout=5):
