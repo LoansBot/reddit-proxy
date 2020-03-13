@@ -69,7 +69,7 @@ class CommentsTest(unittest.TestCase):
                 'version_utc_seconds': 1,
                 'sent_at': time.time(),
                 'args': {
-                    'to': os.environ['REDDIT_USERNAME'],
+                    'recipient': os.environ['REDDIT_USERNAME'],
                     'subject': 'test_messages',
                     'body': 'This is a test *with* markdown'
                 }
