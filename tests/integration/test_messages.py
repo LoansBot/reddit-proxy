@@ -100,12 +100,14 @@ class CommentsTest(unittest.TestCase):
 
         self.assertEqual(body.get('uuid'), 'test_messages_C_uuid')
         self.assertEqual(body.get('type'), 'copy')
-        self.assertIsInstance(body.get('messages'), list)
-        self.assertIsInstance(body.get('comments'), list)
-        self.assertNotEqual(len(body['messages']), 0)
+        self.assertIsInstnace(body.get('info'), dict)
+        info = body['info']
+        self.assertIsInstance(info.get('messages'), list)
+        self.assertIsInstance(info.get('comments'), list)
+        self.assertNotEqual(len(info['messages']), 0)
 
         found_me = False
-        for msg in body['messages']:
+        for msg in info['messages']:
             self.assertIsInstance(msg.get('fullname'), str)
             self.assertIsInstance(msg.get('subject'), str)
             self.assertIsInstance(msg.get('body'), str)
@@ -116,7 +118,7 @@ class CommentsTest(unittest.TestCase):
                 msg['subject'] == 'messages'
                 and msg['body'] == 'This is a test with *markdown*'
             )
-        self.assertTrue(found_me, json.dumps(body))
+        self.assertTrue(found_me, json.dumps(info))
 
 
 if __name__ == '__main__':
