@@ -121,7 +121,7 @@ Setting ignore version to true on retries should only happen if the code is
 extremely resilient, hence we're very confident only temporary issues would
 cause it to fail.
 
-Setting the response queue to `void` will cause the reddit proxy to never
+Prefixing the response queue with `void` will cause the reddit proxy to never
 send a response. There will be no way to confirm the success of the request.
 
 ### Special Request Types
