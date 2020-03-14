@@ -200,7 +200,9 @@ def listen_with_handlers(logger, amqp, handlers):
         )
         logger.connection.commit()
 
-        if handle_style['operation'] == 'copy':
+        if body['response_queue'] == 'void':
+            channel.basic_ack(method_frame.delivery_tag)
+        elif handle_style['operation'] == 'copy':
             channel.basic_publish('', body['response_queue'], json.dumps({
                 'uuid': body['uuid'],
                 'type': 'copy',
