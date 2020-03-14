@@ -113,7 +113,8 @@ def listen_with_handlers(logger, amqp, handlers):
                 'New response queue {} detected at version {}',
                 body['response_queue'], body['version_utc_seconds']
             )
-            channel.queue_declare(body['response_queue'])
+            if not body['response_queue'].startswith('void'):
+                channel.queue_declare(body['response_queue'])
             resp_info = {'version': body['version_utc_seconds']}
             response_queues[body['response_queue']] = resp_info
         elif not body.get('ignore_version') and body['version_utc_seconds'] < resp_info['version']:
@@ -200,7 +201,9 @@ def listen_with_handlers(logger, amqp, handlers):
         )
         logger.connection.commit()
 
-        if handle_style['operation'] == 'copy':
+        if body['response_queue'].startswith('void'):
+            channel.basic_ack(method_frame.delivery_tag)
+        elif handle_style['operation'] == 'copy':
             channel.basic_publish('', body['response_queue'], json.dumps({
                 'uuid': body['uuid'],
                 'type': 'copy',
