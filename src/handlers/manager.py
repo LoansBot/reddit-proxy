@@ -64,7 +64,7 @@ def listen_with_handlers(logger, amqp, handlers):
 
     reddit = Reddit()
     auth = None
-    min_time_to_expiry = timedelta(minutes=15)
+    min_time_to_expiry = timedelta(minutes=1)
 
     channel = amqp.channel()
     channel.queue_declare(queue)
@@ -156,7 +156,7 @@ def listen_with_handlers(logger, amqp, handlers):
         )
         logger.connection.commit()
 
-        if auth is None or auth.expires_at < (datetime.now() - min_time_to_expiry):
+        if auth is None or auth.expires_at < (datetime.now() + min_time_to_expiry):
             logger.print(
                 Level.TRACE,
                 'Reauthenticating with reddit (expires at {})',
