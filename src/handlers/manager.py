@@ -201,6 +201,16 @@ def listen_with_handlers(logger, amqp, handlers):
         )
         logger.connection.commit()
 
+        if status == 401:
+            logger.print(
+                Level.INFO,
+                'Due to 401 status code, purging cached authorization information. '
+                'It should not have expired until {}',
+                auth.expires_at
+            )
+            logger.connection.commit()
+            auth = None
+
         if body['response_queue'].startswith('void'):
             channel.basic_ack(method_frame.delivery_tag)
         elif handle_style['operation'] == 'copy':
