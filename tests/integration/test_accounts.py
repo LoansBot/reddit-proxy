@@ -1,4 +1,4 @@
-"""Verify that we can fetch some comments on /r/borrow"""
+"""Verify that we can view tjstretchalot's account"""
 import unittest
 import os
 import pika
@@ -19,7 +19,7 @@ PIKA_PARAMETERS = pika.ConnectionParameters(
 QUEUE = os.environ['AMQP_QUEUE']
 
 
-RESPONSE_QUEUE = 'subreddit_comments_resp_queue'
+RESPONSE_QUEUE = 'accounts_resp_queue'
 
 
 class CommentsTest(unittest.TestCase):
@@ -37,19 +37,18 @@ class CommentsTest(unittest.TestCase):
         cls.channel.close()
         cls.amqp.close()
 
-    def test_fetch_one_comment(self):
+    def test_show_user(self):
         self.channel.basic_publish(
             '',
             QUEUE,
             json.dumps({
-                'type': 'subreddit_comments',
+                'type': 'show_user',
                 'response_queue': RESPONSE_QUEUE,
-                'uuid': 'subreddit-comments-uuid',
+                'uuid': 'accounts-uuid',
                 'version_utc_seconds': 1,
                 'sent_at': time.time(),
                 'args': {
-                    'subreddit': ['borrow'],
-                    'limit': 1
+                    'username': 'Tjstretchalot'
                 }
             })
         )
@@ -64,27 +63,8 @@ class CommentsTest(unittest.TestCase):
         self.assertIsInstance(body, dict)
         self.assertEqual(body.get('status'), 200)
         self.assertEqual(body.get('type'), 'copy')
-        self.assertEqual(body.get('uuid'), 'subreddit-comments-uuid')
+        self.assertEqual(body.get('uuid'), 'accounts-uuid')
         self.assertIsInstance(body.get('info'), dict)
         info = body['info']
-        self.assertIsInstance(info.get("after"), (str, None))
-        self.assertIsInstance(info.get('comments'), list)
-
-        comments = info['comments']
-        self.assertEqual(len(comments), 1)
-        comment = comments[0]
-        self.assertIsInstance(comment, dict)
-        self.assertIsInstance(comment.get('fullname'), str)
-        self.assertEqual(comment['fullname'][:3], 't1_')
-        self.assertIsInstance(comment.get('body'), str)
-        self.assertIsInstance(comment.get('author'), str)
-        self.assertIsInstance(comment.get('link_fullname'), str)
-        self.assertEqual(comment['link_fullname'][:3], 't3_')
-        self.assertEqual(comment.get('subreddit'), 'borrow')
-        self.assertIsInstance(comment.get('created_utc'), (int, float))
-        # we give some wiggle room because our clock might be off
-        self.assertTrue(comment['created_utc'] < time.time() + 10)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        self.assertIsInstance(info.get('cumulative_karma'), int)
+        self.assertIsInstance(info.get('created_at_utc_seconds'), float)

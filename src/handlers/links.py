@@ -36,7 +36,8 @@ class SubredditLinksHandler:
     def handle(self, reddit, auth, data):
         if data.get('limit', 1) < 1:
             return 400, None
-        result = reddit.subreddit_links(data['subreddit'], data.get('limit'), data.get('after'), auth)
+        result = reddit.subreddit_links(
+            data['subreddit'], data.get('limit'), data.get('after'), auth)
         if result.status_code > 299:
             return result.status_code, None
 

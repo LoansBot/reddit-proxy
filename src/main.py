@@ -70,7 +70,10 @@ def main():
             if attempt > 0:
                 sleep_time = 4 ** attempt
                 print(f'Sleeping for {sleep_time} seconds..')
-                logger.print(Level.WARN, 'Failed to connect to the AMQP server; will retry in {} seconds', sleep_time)
+                logger.print(
+                    Level.WARN,
+                    'Failed to connect to the AMQP server; ' +
+                    'will retry in {} seconds', sleep_time)
                 logger.connection.commit()
                 time.sleep(sleep_time)
 
@@ -84,7 +87,11 @@ def main():
                 logger.connection.commit()
 
         if amqp is None:
-            logger.print(Level.ERROR, 'Failed to connect to the AMQP server (exhausted all attempts): shutting down')
+            logger.print(
+                Level.ERROR,
+                'Failed to connect to the AMQP server ' +
+                '(exhausted all attempts): shutting down'
+            )
             conn.commit()
             logger.close()
             conn.close()
@@ -114,7 +121,10 @@ def main():
                 if sig_num is not None:
                     logger.print(Level.INFO, 'Received signal {}, clean shutdown started', sig_num)
                 else:
-                    logger.print(Level.ERROR, 'A crash has been detected and a clean shutdown has been initiated')
+                    logger.print(
+                        Level.ERROR,
+                        'A crash has been detected and a clean shutdown has been initiated'
+                    )
                 logger.connection.commit()
             except:  # noqa: E722
                 print('Failed to report the signal to the logger, continuing shutdown anyway')
@@ -133,7 +143,10 @@ def main():
                             logger.exception(Level.ERROR)
                             logger.connection.commit()
                         except:  # noqa: E72
-                            print('Failed to report exception to the logger, disabling logger and continuing shutdown')
+                            print(
+                                'Failed to report exception to the logger, ' +
+                                'disabling logger and continuing shutdown'
+                            )
                             traceback.print_exc()
                             reporting_errors = False
 

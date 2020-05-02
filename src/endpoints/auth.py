@@ -20,7 +20,11 @@ class LoginEndpoint:
         return requests.post(
             'https://www.reddit.com/api/v1/access_token',
             headers={**self.default_headers, **{
-                'Authorization': 'Basic ' + b64encode((client_id + ':' + client_secret).encode('ascii')).decode('ascii')
+                'Authorization': (
+                    'Basic ' + b64encode(
+                        (client_id + ':' + client_secret).encode('ascii')
+                    ).decode('ascii')
+                )
             }},
             data={
                 'grant_type': 'password',
