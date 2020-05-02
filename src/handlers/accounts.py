@@ -100,6 +100,7 @@ class UserIsApprovedHandler:
             'approved': rel_exists
         }
 
+
 class UserIsBannedHandler:
     """Handles requests of type "user_is_banned". This accepts data in the following
     form:
