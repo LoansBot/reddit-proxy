@@ -85,7 +85,7 @@ class UserIsApprovedHandler:
         self.requires_delay = True
 
     def handle(self, reddit, auth, data):
-        result = reddit.user_is_moderator(auth, data['subreddit'], data['username'])
+        result = reddit.user_is_approved(auth, data['subreddit'], data['username'])
         if result.status_code > 299:
             return result.status_code, None
 
@@ -100,10 +100,45 @@ class UserIsApprovedHandler:
             'approved': rel_exists
         }
 
+class UserIsBannedHandler:
+    """Handles requests of type "user_is_banned". This accepts data in the following
+    form:
+    {
+        "subreddit": str,
+        "username": str
+    }
+
+    And returns in the following form:
+
+    {
+        "banned": bool
+    }
+    """
+    def __init__(self):
+        self.name = 'user_is_banned'
+        self.requires_delay = True
+
+    def handle(self, reddit, auth, data):
+        result = reddit.user_is_banned(auth, data['subreddit'], data['username'])
+        if result.status_code > 299:
+            return result.status_code, None
+
+        body = result.json()
+        rel_exists = any(
+            True
+            for ele in body['data']['children']
+            if ele['name'].lower() == data['username'].lower()
+        )
+
+        return result.status_code, {
+            'banned': rel_exists
+        }
+
 
 def register_handlers(handlers):
     handlers += [
         UserShowHandler(),
         UserIsModeratorHandler(),
-        UserIsApprovedHandler()
+        UserIsApprovedHandler(),
+        UserIsBannedHandler()
     ]

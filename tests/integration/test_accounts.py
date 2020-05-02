@@ -167,3 +167,69 @@ class CommentsTest(unittest.TestCase):
         info = body['info']
         self.assertIsInstance(info.get('approved'), bool)
         self.assertFalse(info['approved'])
+
+    def test_user_is_banned_no(self):
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'user_is_banned',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'accounts-uuid',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {
+                    'username': 'Tjstretchalot',
+                    'subreddit': os.environ['REDDIT_MOD_SUBREDDIT']
+                }
+            })
+        )
+        for (
+                method_frame, properties, body_bytes
+         ) in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
+            self.assertIsNotNone(method_frame)
+            self.channel.basic_ack(method_frame.delivery_tag)
+            body = json.loads(body_bytes.decode('utf-8'))
+            break
+
+        self.assertIsInstance(body, dict)
+        self.assertEqual(body.get('status'), 200)
+        self.assertEqual(body.get('type'), 'copy')
+        self.assertEqual(body.get('uuid'), 'accounts-uuid')
+        self.assertIsInstance(body.get('info'), dict)
+        info = body['info']
+        self.assertIsInstance(info.get('banned'), bool)
+        self.assertFalse(info['banned'])
+
+    def test_user_is_banned_yes(self):
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'user_is_banned',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'accounts-uuid',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {
+                    'username': 'FoxK56',
+                    'subreddit': os.environ['REDDIT_MOD_SUBREDDIT']
+                }
+            })
+        )
+        for (
+                method_frame, properties, body_bytes
+         ) in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
+            self.assertIsNotNone(method_frame)
+            self.channel.basic_ack(method_frame.delivery_tag)
+            body = json.loads(body_bytes.decode('utf-8'))
+            break
+
+        self.assertIsInstance(body, dict)
+        self.assertEqual(body.get('status'), 200)
+        self.assertEqual(body.get('type'), 'copy')
+        self.assertEqual(body.get('uuid'), 'accounts-uuid')
+        self.assertIsInstance(body.get('info'), dict)
+        info = body['info']
+        self.assertIsInstance(info.get('banned'), bool)
+        self.assertTrue(info['banned'])
