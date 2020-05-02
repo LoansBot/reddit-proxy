@@ -68,3 +68,102 @@ class CommentsTest(unittest.TestCase):
         info = body['info']
         self.assertIsInstance(info.get('cumulative_karma'), int)
         self.assertIsInstance(info.get('created_at_utc_seconds'), float)
+
+    def test_user_is_moderator_yes(self):
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'user_is_moderator',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'accounts-uuid',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {
+                    'username': 'Tjstretchalot',
+                    'subreddit': 'borrow'
+                }
+            })
+        )
+        for (
+                method_frame, properties, body_bytes
+         ) in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
+            self.assertIsNotNone(method_frame)
+            self.channel.basic_ack(method_frame.delivery_tag)
+            body = json.loads(body_bytes.decode('utf-8'))
+            break
+
+        self.assertIsInstance(body, dict)
+        self.assertEqual(body.get('status'), 200)
+        self.assertEqual(body.get('type'), 'copy')
+        self.assertEqual(body.get('uuid'), 'accounts-uuid')
+        self.assertIsInstance(body.get('info'), dict)
+        info = body['info']
+        self.assertIsInstance(info.get('moderator'), bool)
+        self.assertTrue(info['moderator'])
+
+    def test_user_is_moderator_no(self):
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'user_is_moderator',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'accounts-uuid',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {
+                    'username': 'Tjstretchalot',
+                    'subreddit': 'aww'
+                }
+            })
+        )
+        for (
+                method_frame, properties, body_bytes
+         ) in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
+            self.assertIsNotNone(method_frame)
+            self.channel.basic_ack(method_frame.delivery_tag)
+            body = json.loads(body_bytes.decode('utf-8'))
+            break
+
+        self.assertIsInstance(body, dict)
+        self.assertEqual(body.get('status'), 200)
+        self.assertEqual(body.get('type'), 'copy')
+        self.assertEqual(body.get('uuid'), 'accounts-uuid')
+        self.assertIsInstance(body.get('info'), dict)
+        info = body['info']
+        self.assertIsInstance(info.get('moderator'), bool)
+        self.assertFalse(info['moderator'])
+
+    def test_user_is_approved(self):
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'user_is_approved',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'accounts-uuid',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {
+                    'username': 'Tjstretchalot',
+                    'subreddit': 'aww'
+                }
+            })
+        )
+        for (
+                method_frame, properties, body_bytes
+         ) in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
+            self.assertIsNotNone(method_frame)
+            self.channel.basic_ack(method_frame.delivery_tag)
+            body = json.loads(body_bytes.decode('utf-8'))
+            break
+
+        self.assertIsInstance(body, dict)
+        self.assertEqual(body.get('status'), 200)
+        self.assertEqual(body.get('type'), 'copy')
+        self.assertEqual(body.get('uuid'), 'accounts-uuid')
+        self.assertIsInstance(body.get('info'), dict)
+        info = body['info']
+        self.assertIsInstance(info.get('approved'), bool)
+        self.assertFalse(info['approved'])

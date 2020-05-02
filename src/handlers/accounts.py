@@ -31,5 +31,79 @@ class UserShowHandler:
         }
 
 
+class UserIsModeratorHandler:
+    """Handles requests of type "user_is_moderator". This accepts data in the following
+    form:
+    {
+        "subreddit": str,
+        "username": str
+    }
+
+    And returns in the following form:
+
+    {
+        "moderator": bool
+    }
+    """
+    def __init__(self):
+        self.name = 'user_is_moderator'
+        self.requires_delay = True
+
+    def handle(self, reddit, auth, data):
+        result = reddit.user_is_moderator(auth, data['subreddit'], data['username'])
+        if result.status_code > 299:
+            return result.status_code, None
+
+        body = result.json()
+        rel_exists = any(
+            True
+            for ele in body['data']['children']
+            if ele['name'].lower() == data['username'].lower()
+        )
+
+        return result.status_code, {
+            'moderator': rel_exists
+        }
+
+
+class UserIsApprovedHandler:
+    """Handles requests of type "user_is_approved". This accepts data in the following
+    form:
+    {
+        "subreddit": str,
+        "username": str
+    }
+
+    And returns in the following form:
+
+    {
+        "approved": bool
+    }
+    """
+    def __init__(self):
+        self.name = 'user_is_approved'
+        self.requires_delay = True
+
+    def handle(self, reddit, auth, data):
+        result = reddit.user_is_moderator(auth, data['subreddit'], data['username'])
+        if result.status_code > 299:
+            return result.status_code, None
+
+        body = result.json()
+        rel_exists = any(
+            True
+            for ele in body['data']['children']
+            if ele['name'].lower() == data['username'].lower()
+        )
+
+        return result.status_code, {
+            'approved': rel_exists
+        }
+
+
 def register_handlers(handlers):
-    handlers += [UserShowHandler()]
+    handlers += [
+        UserShowHandler(),
+        UserIsModeratorHandler(),
+        UserIsApprovedHandler()
+    ]
