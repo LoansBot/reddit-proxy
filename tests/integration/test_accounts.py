@@ -147,7 +147,7 @@ class CommentsTest(unittest.TestCase):
                 'sent_at': time.time(),
                 'args': {
                     'username': 'Tjstretchalot',
-                    'subreddit': 'aww'
+                    'subreddit': os.environ['REDDIT_MOD_SUBREDDIT']
                 }
             })
         )
@@ -166,7 +166,6 @@ class CommentsTest(unittest.TestCase):
         self.assertIsInstance(body.get('info'), dict)
         info = body['info']
         self.assertIsInstance(info.get('approved'), bool)
-        self.assertFalse(info['approved'])
 
     def test_user_is_banned_no(self):
         self.channel.basic_publish(
