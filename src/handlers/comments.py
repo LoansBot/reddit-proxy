@@ -28,7 +28,10 @@ class SubredditCommentsHandler:
         self.requires_delay = True
 
     def handle(self, reddit, auth, data):
-        result = reddit.subreddit_comments(data['subreddit'], data.get('limit'), data.get('after'), auth)
+        result = reddit.subreddit_comments(
+            data['subreddit'], data.get('limit'), data.get('after'),
+            auth
+        )
         if result.status_code > 299:
             return result.status_code, None
 

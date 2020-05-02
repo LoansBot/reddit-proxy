@@ -54,7 +54,9 @@ class LinksTest(unittest.TestCase):
                 }
             })
         )
-        for method_frame, properties, body_bytes in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
+        for (
+                method_frame, properties, body_bytes
+         ) in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
             self.assertIsNotNone(method_frame)
             self.channel.basic_ack(method_frame.delivery_tag)
             body = json.loads(body_bytes.decode('utf-8'))
@@ -104,7 +106,9 @@ class LinksTest(unittest.TestCase):
                 }
             })
         )
-        for method_frame, properties, body_bytes in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
+        for (
+                method_frame, properties, body_bytes
+        ) in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
             self.assertIsNotNone(method_frame)
             self.channel.basic_ack(method_frame.delivery_tag)
             body = json.loads(body_bytes.decode('utf-8'))

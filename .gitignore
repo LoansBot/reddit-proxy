@@ -133,5 +133,8 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
+# vs code
+.vscode
+
 # Dependencies
 src/lblogging
