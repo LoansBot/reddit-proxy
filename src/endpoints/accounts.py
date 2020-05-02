@@ -18,7 +18,72 @@ class UserShowEndpoint:
         )
 
 
+class UserIsModeratorEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'user_is_moderator'
+        self.default_headers = default_headers
+
+    def make_request(self, auth, subreddit, username):
+        """Fetch the user list with the given username. If the user is a
+        moderator of the given subreddit this will have one relationship
+        which is that user, otherwise it will have no relationships.
+
+        :param subreddit: The subreddit to check for a relationshp for
+        :param username: The username to check for a relationship for
+        """
+        return requests.get(
+            f'https://oauth.reddit.com/r/{subreddit}/about/moderators',
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            params={'user': username}
+        )
+
+
+class UserIsApprovedEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'user_is_approved'
+        self.default_headers = default_headers
+
+    def make_request(self, auth, subreddit, username):
+        """Fetch the user list with the given username. If the user is an
+        approved submitter of the subreddit this is a user listing with just
+        that user / subreddit relationship, otherwise this will have no
+        relationships.
+
+        :param subreddit: The subreddit to check for a relationship on
+        :param username: The username to check for a relationship with
+        """
+        return requests.get(
+            f'https://oauth.reddit.com/r/{subreddit}/about/contributors',
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            params={'user': username}
+        )
+
+
+class UserIsBannedEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'user_is_banned'
+        self.default_headers = default_headers
+
+    def make_request(self, auth, subreddit, username):
+        """Fetch the user list with the given username. If the user is an
+        banned user of the subreddit this is a user listing with just
+        that user / subreddit relationship, otherwise this will have no
+        relationships.
+
+        :param subreddit: The subreddit to check for a relationship on
+        :param username: The username to check for a relationship with
+        """
+        return requests.get(
+            f'https://oauth.reddit.com/r/{subreddit}/about/banned',
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            params={'user': username}
+        )
+
+
 def register_endpoints(arr, headers):
     arr += [
-        UserShowEndpoint(headers)
+        UserShowEndpoint(headers),
+        UserIsModeratorEndpoint(headers),
+        UserIsApprovedEndpoint(headers),
+        UserIsBannedEndpoint(headers)
     ]

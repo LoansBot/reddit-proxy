@@ -122,6 +122,7 @@ jobs:
         AMQP_VHOST: /
         AMQP_QUEUE: rproxy
         REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+        REDDIT_MOD_SUBREDDIT: ${{ secrets.REDDIT_MOD_SUBREDDIT }}
     - name: Shutdown server
       if: always()
       run: |
