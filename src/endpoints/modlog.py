@@ -30,7 +30,7 @@ class ModLogEndpoint:
         if before is not None:
             data['before'] = before
         return requests.get(
-            f'https://oauth.reddit.com/r/{subreddit}/log.json',
+            f'https://oauth.reddit.com/r/{subreddit}/about/log',
             headers={**self.default_headers, **auth.get_auth_headers()},
             data=data
         )
