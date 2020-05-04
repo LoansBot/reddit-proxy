@@ -57,7 +57,7 @@ class PingTest(unittest.TestCase):
         body = helper.fetch_one(self, RESPONSE_QUEUE)
 
         self.assertEqual(body.get('type'), 'copy')
-        self.assertIsInstance(body.get('info'), 'dict')
+        self.assertIsInstance(body.get('info'), dict)
 
         info = body['info']
         self.assertIsInstance(info.get('after'), (type(None), str))
