@@ -25,7 +25,7 @@ class ModLogHandler:
     }
     """
     def __init__(self):
-        self.name = 'subreddit_comments'
+        self.name = 'modlog'
         self.requires_delay = True
 
     def handle(self, reddit, auth, data):
