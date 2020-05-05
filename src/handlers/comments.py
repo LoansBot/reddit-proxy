@@ -79,7 +79,7 @@ class PostCommentHandler:
     def handle(self, reddit, auth, data):
         res = reddit.post_comment(data['parent'], data['text'], auth)
         if res.status_code > 299:
-            return result.status_code, None
+            return res.status_code, None
         return 'success', None
 
 
