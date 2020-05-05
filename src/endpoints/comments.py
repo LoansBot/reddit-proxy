@@ -31,5 +31,28 @@ class SubredditCommentsListing:
         )
 
 
+class PostCommentEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'post_comment'
+        self.default_headers = default_headers
+
+    def make_request(self, parent, text, auth):
+        """Post a response to the fullname identified by 'parent' with the
+        markdown text 'text'
+
+        :param parent: The parent fullname to respond to
+        :param text: The markdown to respond with
+        :param auth: The authorization to use
+        """
+        return requests.post(
+            f'https://oauth.reddit.com/api/compose',
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            data={'parent': parent, 'text': text}
+        )
+
+
 def register_endpoints(arr, headers):
-    arr += [SubredditCommentsListing(headers)]
+    arr += [
+        SubredditCommentsListing(headers),
+        PostCommentEndpoint(headers)
+    ]

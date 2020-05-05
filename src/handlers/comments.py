@@ -62,5 +62,29 @@ class SubredditCommentsHandler:
         return result.status_code, {'comments': comments, 'after': after}
 
 
+class PostCommentHandler:
+    """Handles requests of type "post_comment". This accepts data in the
+    following form:
+    {
+        "parent": str,
+        "text": str
+    }
+
+    And returns success/failure status code.
+    """
+    def __init__(self):
+        self.name = 'post_comment'
+        self.requires_delay = True
+
+    def handle(self, reddit, auth, data):
+        res = reddit.post_comment(data['parent'], data['text'], auth)
+        if res.status_code > 299:
+            return res.status_code, None
+        return 'success', None
+
+
 def register_handlers(handlers):
-    handlers += [SubredditCommentsHandler()]
+    handlers += [
+        SubredditCommentsHandler(),
+        PostCommentHandler()
+    ]
