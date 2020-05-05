@@ -47,7 +47,7 @@ class PostCommentEndpoint:
         return requests.post(
             f'https://oauth.reddit.com/api/compose',
             headers={**self.default_headers, **auth.get_auth_headers()},
-            data={'parent': parent, 'text': text}
+            data={'thing_id': parent, 'text': text}
         )
 
 
