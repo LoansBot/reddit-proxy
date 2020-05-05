@@ -45,7 +45,7 @@ class PostCommentEndpoint:
         :param auth: The authorization to use
         """
         return requests.post(
-            f'https://oauth.reddit.com/api/compose',
+            f'https://oauth.reddit.com/api/comment',
             headers={**self.default_headers, **auth.get_auth_headers()},
             data={'thing_id': parent, 'text': text}
         )
