@@ -16,7 +16,8 @@ class SubredditCommentsHandler:
         "comments": [
             {
                 "fullname": str, "body": str, "author": str,
-                "link_fullname": str,  "subreddit": str, "created_utc": float
+                "link_fullname": str, "link_author": str, "subreddit": str,
+                "created_utc": float
             },
             ...
         ],
@@ -48,6 +49,7 @@ class SubredditCommentsHandler:
                     'body': child['body'],
                     'author': child['author'],
                     'link_fullname': child['link_id'],
+                    'link_author': child['link_author'],
                     'subreddit': child['subreddit'],
                     'created_utc': child['created_utc']
                 }
