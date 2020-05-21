@@ -65,15 +65,15 @@ def listen_with_handlers(logger, amqp, handlers):
             failed_requests_counter += 1
 
         if 'x-ratelimit-reset' in resp.headers and 'x-ratelimit-remaining' in resp.headers:
-            reset = int(resp.headers['x-ratelimit-reset'])
-            remaining = int(resp.headers['x-ratelimit-remaining'])
+            reset = float(resp.headers['x-ratelimit-reset'])
+            remaining = float(resp.headers['x-ratelimit-remaining'])
             logger.print(
                 Level.TRACE,
                 'Received ratelimit headers from endpoint {}; x-ratelimit-reset: {}, x-ratelimit-remaining: {}',
                 endpoint_name, reset, remaining
             )
 
-            if remaining <= 0:
+            if remaining <= 1:
                 logger.print(
                     Level.WARN,
                     'Setting explicit ratelimit from ratelimit headers in response to {}! reset={}, remaining={}',
