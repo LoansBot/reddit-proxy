@@ -12,6 +12,10 @@ class Reddit:
     interface to each endpoint, as well as the appropriate docstrings for each
     of the endpoints, without actually implementing all the endpoints in a
     single file.
+
+    For all functions, if the the "request_callback" attribute is set on this
+    instance it should be a callable which expects two arguments - the name of
+    the request and the response.
     """
     pass
 
@@ -50,7 +54,10 @@ def _wrap_endpoint(endpoint):
     my_func_str = (
         'def wrapped(' + func_def_str + '):\n'
         '  global endpoint\n'
-        '  return endpoint.make_request(' + args_str + ')\n'
+        '  result = endpoint.make_request(' + args_str + ')\n'
+        '  if self.request_callback is not None:\n'
+        f"    self.request_callback('{endpoint.name}', result)\n"
+        '  return result\n'
     )
 
     glbls = {'endpoint': endpoint}

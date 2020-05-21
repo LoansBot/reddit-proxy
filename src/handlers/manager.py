@@ -52,9 +52,47 @@ def listen_with_handlers(logger, amqp, handlers):
     last_processed_at = None
     min_td_btwn_reqs = timedelta(seconds=float(os.environ['MIN_TIME_BETWEEN_REQUESTS_S']))
 
+    failed_requests_counter = 0
+    explicit_ratelimit_until = None
+
+    def reddit_request_callback(endpoint_name, resp):
+        nonlocal failed_requests_counter
+        nonlocal explicit_ratelimit_until
+
+        if resp.status_code >= 200 and resp.status_code <= 299:
+            failed_requests_counter = max(0, failed_requests_counter - 1)
+        else:
+            failed_requests_counter += 1
+
+        if 'x-ratelimit-reset' in resp.headers and 'x-ratelimit-remaining' in resp.headers:
+            reset = int(resp.headers['x-ratelimit-reset'])
+            remaining = int(resp.headers['x-ratelimit-remaining'])
+            logger.print(
+                Level.TRACE,
+                'Received ratelimit headers from endpoint {}; x-ratelimit-reset: {}, x-ratelimit-remaining: {}',
+                endpoint_name, reset, remaining
+            )
+
+            if remaining <= 0:
+                logger.print(
+                    Level.WARN,
+                    'Setting explicit ratelimit from ratelimit headers in response to {}! reset={}, remaining={}',
+                    endpoint_name, reset, remaining
+                )
+                explicit_ratelimit_until = time.time() + reset
+
     def delay_for_reddit():
+        target_delay = (
+            min_td_btwn_reqs
+            if failed_requests_counter == 0
+            else min((10 * (2 ** failed_requests_counter)), 1800)
+        )
+        if explicit_ratelimit_until is not None:
+            seconds_until_reset = explicit_ratelimit_until - time.time()
+            target_delay = max(target_delay, seconds_until_reset + 1)
+
         if (last_processed_at is not None
-                and (datetime.now() - last_processed_at) < min_td_btwn_reqs):
+                and (datetime.now() - last_processed_at) < target_delay):
             req_sleep_time = min_td_btwn_reqs - (datetime.now() - last_processed_at)
             time.sleep(req_sleep_time.total_seconds())
 
@@ -63,6 +101,7 @@ def listen_with_handlers(logger, amqp, handlers):
     last_cleaned_respqueues = datetime.now()
 
     reddit = Reddit()
+    reddit.request_callback = reddit_request_callback
     auth = None
     min_time_to_expiry = timedelta(minutes=1)
 
