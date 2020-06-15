@@ -119,7 +119,7 @@ def listen_with_handlers(logger, amqp, handlers):
                         'Forgetting about response queue {} - last saw it {} ago',
                         k, time_since_seen
                     )
-                    del val[k]
+                    del response_queues[k]
             logger.connection.commit()
 
         if method_frame is None:
