@@ -17,7 +17,9 @@ class Reddit:
     instance it should be a callable which expects two arguments - the name of
     the request and the response.
     """
-    pass
+    def __init__(self):
+        self.request_callback = None
+
 
 # All this does is take BarEndpoint which has name bar and convert
 # BarEndpoint.make_request into Reddit.bar. 90% of the work is getting this
