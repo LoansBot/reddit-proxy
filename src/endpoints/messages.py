@@ -49,7 +49,8 @@ class ComposeEndpoint:
         return requests.post(
             f'https://oauth.reddit.com/api/compose',
             headers={**self.default_headers, **auth.get_auth_headers()},
-            json={
+            data={
+                'api_type': 'json',
                 'subject': subject,
                 'text': body,
                 'to': recipient
