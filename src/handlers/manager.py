@@ -69,14 +69,20 @@ def listen_with_handlers(logger, amqp, handlers):
             remaining = float(resp.headers['x-ratelimit-remaining'])
             logger.print(
                 Level.TRACE,
-                'Received ratelimit headers from endpoint {}; x-ratelimit-reset: {}, x-ratelimit-remaining: {}',
+                (
+                    'Received ratelimit headers from endpoint {}; ' +
+                    'x-ratelimit-reset: {}, x-ratelimit-remaining: {}'
+                ),
                 endpoint_name, reset, remaining
             )
 
             if remaining <= 1:
                 logger.print(
                     Level.WARN,
-                    'Setting explicit ratelimit from ratelimit headers in response to {}! reset={}, remaining={}',
+                    (
+                        'Setting explicit ratelimit from ratelimit headers ' +
+                        'in response to {}! reset={}, remaining={}'
+                    ),
                     endpoint_name, reset, remaining
                 )
                 explicit_ratelimit_until = time.time() + reset

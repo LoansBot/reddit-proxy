@@ -45,14 +45,37 @@ class PostCommentEndpoint:
         :param auth: The authorization to use
         """
         return requests.post(
-            f'https://oauth.reddit.com/api/comment',
+            'https://oauth.reddit.com/api/comment',
             headers={**self.default_headers, **auth.get_auth_headers()},
             data={'thing_id': parent, 'text': text}
+        )
+
+
+class LookupCommentEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'lookup_comment'
+        self.default_headers = default_headers
+
+    def make_request(self, link_id, comment_id, auth):
+        """Fetch the comment within the given link id with the given id. This returns
+        an array with two listings, one of which (typically the first) is for the link
+        and the other of which (typically the second) is for the comment.
+
+        :param link_id: The id of the link, i.e., t3_xyz, that the comment is in
+        :param comment_id: The id of the comment, i.e., t1_abc
+        :param auth: The authorization to use
+        """
+        return requests.get(
+            'https://oauth.reddit.com/comments/{}/loansbot/{}'.format(
+                link_id[3:],
+                comment_id[3:]
+            )
         )
 
 
 def register_endpoints(arr, headers):
     arr += [
         SubredditCommentsListing(headers),
-        PostCommentEndpoint(headers)
+        PostCommentEndpoint(headers),
+        LookupCommentEndpoint(headers)
     ]
