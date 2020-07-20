@@ -96,6 +96,10 @@ class LookupCommentHandler:
 
     And returns a single comment, as if from SubredditCommentsHandler.
     """
+    def __init__(self):
+        self.name = 'lookup_comment'
+        self.requires_delay = True
+
     def handle(self, reddit, auth, data):
         res = reddit.lookup_comment(data['link_fullname'], data['comment_fullname'], auth)
         if res.status_code > 299:
