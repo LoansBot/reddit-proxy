@@ -85,8 +85,64 @@ class PostCommentHandler:
         return 'success', None
 
 
+class LookupCommentHandler:
+    """Handles requests of the form "lookup_comment". This accepts data in the
+    form
+
+    {
+        "link_fullname": "t3_xyz",
+        "comment_fullname": "t1_abc"
+    }
+
+    And returns a single comment, as if from SubredditCommentsHandler.
+    """
+    def handle(self, reddit, auth, data):
+        res = reddit.lookup_comment(data['link_fullname'], data['comment_fullname'], auth)
+        if res.status_code > 299:
+            return res.status_code, None
+
+        body = res.json()
+        if len(body) != 2:
+            return 404, None
+
+        if body[0]['data']['dist'] is not None:
+            comment_listing = body[1]
+            link_listing = body[0]
+        else:
+            comment_listing = body[0]
+            link_listing = body[1]
+
+        if comment_listing['data']['dist'] is not None:
+            return 404, None
+
+        children = comment_listing['data']['children']
+        if not children:
+            return 404, None
+
+        child = children[0]
+        if child['kind'] != 't1':
+            raise Exception(f'bad child in comments listing: {comment_listing} (expected kind=t1)')
+
+        link_children = link_listing['data']['children']
+        if not link_children or link_children[0]['kind'] != 't3':
+            raise Exception(f'bad child in link listing: {link_listing} (expected kind=t3)')
+
+        link_child = link_children[0]['data']
+        child = child['data']
+        return res.status_code, {
+            'fullname': child['name'],
+            'body': child['body'],
+            'author': child['author'],
+            'link_fullname': link_child['name'],
+            'link_author': link_child['author'],
+            'subreddit': child['subreddit'],
+            'created_utc': child['created_utc']
+        }
+
+
 def register_handlers(handlers):
     handlers += [
         SubredditCommentsHandler(),
-        PostCommentHandler()
+        PostCommentHandler(),
+        LookupCommentHandler()
     ]
