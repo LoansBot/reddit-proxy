@@ -88,6 +88,9 @@ def listen_with_handlers(logger, amqp, handlers):
                 explicit_ratelimit_until = time.time() + reset
 
     def delay_for_reddit():
+        if last_processed_at is None:
+            return
+
         target_delay = (
             min_td_btwn_reqs
             if failed_requests_counter == 0
@@ -97,9 +100,9 @@ def listen_with_handlers(logger, amqp, handlers):
             seconds_until_reset = explicit_ratelimit_until - time.time()
             target_delay = timedelta(seconds=max(target_delay, seconds_until_reset + 1))
 
-        if (last_processed_at is not None
-                and (datetime.now() - last_processed_at) < target_delay):
-            req_sleep_time = min_td_btwn_reqs - (datetime.now() - last_processed_at)
+        delay_so_far = datetime.now() - last_processed_at
+        if delay_so_far < target_delay:
+            req_sleep_time = target_delay - delay_so_far
             time.sleep(req_sleep_time.total_seconds())
 
     time_btwn_clean = timedelta(hours=1)
