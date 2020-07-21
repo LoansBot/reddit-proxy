@@ -91,11 +91,11 @@ def listen_with_handlers(logger, amqp, handlers):
         target_delay = (
             min_td_btwn_reqs
             if failed_requests_counter == 0
-            else min((10 * (2 ** failed_requests_counter)), 1800)
+            else timedelta(seconds=min((10 * (2 ** failed_requests_counter)), 1800))
         )
         if explicit_ratelimit_until is not None:
             seconds_until_reset = explicit_ratelimit_until - time.time()
-            target_delay = max(target_delay, seconds_until_reset + 1)
+            target_delay = timedelta(seconds=max(target_delay, seconds_until_reset + 1))
 
         if (last_processed_at is not None
                 and (datetime.now() - last_processed_at) < target_delay):
