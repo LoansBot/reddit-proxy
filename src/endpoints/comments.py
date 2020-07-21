@@ -66,7 +66,7 @@ class LookupCommentEndpoint:
         :param auth: The authorization to use
         """
         return requests.get(
-            'https://oauth.reddit.com/comments/{}/loansbot/{}'.format(
+            'https://oauth.reddit.com/comments/{}?comment={}&limit=1'.format(
                 link_id[3:],
                 comment_id[3:]
             )
