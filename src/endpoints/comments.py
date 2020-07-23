@@ -66,10 +66,11 @@ class LookupCommentEndpoint:
         :param auth: The authorization to use
         """
         return requests.get(
-            'https://oauth.reddit.com/comments/{}?comment={}&limit=1'.format(
+            'https://oauth.reddit.com/comments/{}.json?comment={}&limit=1'.format(
                 link_id[3:],
                 comment_id[3:]
-            )
+            ),
+            headers={**self.default_headers, **auth.get_auth_headers()}
         )
 
 
