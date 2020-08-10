@@ -51,7 +51,7 @@ class SubredditLinksHandler:
             child = child['data']
             if child.get('banned_at_utc') is not None:
                 continue
-            if child.get('removed') is not None:
+            if child.get('removed'):
                 continue
 
             gen_info = {
