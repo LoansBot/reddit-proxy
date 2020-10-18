@@ -30,19 +30,19 @@ class SubredditFriendEndpoint(Endpoint):
         :param ban_note: The private moderator note for why the user was banned. Ignored if
         the relationship is not banned.
         """
-        json = {
+        data = {
             'name': username,
             'type': relationship
         }
         if relationship == 'banned':
-            json['ban_message'] = ban_message
-            json['ban_reason'] = ban_reason
-            json['note'] = ban_note
+            data['ban_message'] = ban_message
+            data['ban_reason'] = ban_reason
+            data['note'] = ban_note
 
         return requests.post(
             f'https://oauth.reddit.com/r/{subreddit}/api/friend?api_type=json',
             headers={**self.default_headers, **auth.get_auth_headers()},
-            json=json
+            data=data
         )
 
 
@@ -62,7 +62,7 @@ class SubredditUnfriendEndpoint(Endpoint):
         return requests.post(
             f'https://oauth.reddit.com/r/{subreddit}/api/unfriend',
             headers={**self.default_headers, **auth.get_auth_headers()},
-            json={
+            data={
                 'name': username,
                 'type': relationship
             }
