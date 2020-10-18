@@ -45,7 +45,7 @@ class CommentsTest(unittest.TestCase):
                 'version_utc_seconds': 1,
                 'sent_at': time.time(),
                 'args': {
-                    'subreddit': 'borrowtests',
+                    'subreddit': os.environ['REDDIT_MOD_SUBREDDIT'],
                     'username': 'foxk56',
                     'message': 'Test message',
                     'note': 'Test note'
@@ -70,7 +70,7 @@ class CommentsTest(unittest.TestCase):
                 'version_utc_seconds': 1,
                 'sent_at': time.time(),
                 'args': {
-                    'subreddit': 'borrowtests',
+                    'subreddit': os.environ['REDDIT_MOD_SUBREDDIT'],
                     'username': 'foxk56'
                 }
             })
