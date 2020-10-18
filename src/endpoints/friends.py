@@ -31,7 +31,7 @@ class SubredditFriendEndpoint(Endpoint):
         the relationship is not banned.
         """
         json = {
-            'name': 'username',
+            'name': username,
             'type': relationship
         }
         if relationship == 'banned':
