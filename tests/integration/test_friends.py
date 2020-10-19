@@ -84,6 +84,54 @@ class CommentsTest(unittest.TestCase):
             }
         )
 
+    def test_approve_disapprove(self):
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'approve_user',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'approve-user-uuid',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {
+                    'subreddit': os.environ['REDDIT_MOD_SUBREDDIT'],
+                    'username': 'Dr3wcifer'
+                }
+            })
+        )
+        body = helper.fetch_one(self, RESPONSE_QUEUE)
+        self.assertEqual(
+            body,
+            {
+                'uuid': 'approve-user-uuid',
+                'type': 'success'
+            }
+        )
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'disapprove_user',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'disapprove-user-uuid',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {
+                    'subreddit': os.environ['REDDIT_MOD_SUBREDDIT'],
+                    'username': 'Dr3wcifer'
+                }
+            })
+        )
+        body = helper.fetch_one(self, RESPONSE_QUEUE)
+        self.assertEqual(
+            body,
+            {
+                'uuid': 'disapprove-user-uuid',
+                'type': 'success'
+            }
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
