@@ -48,8 +48,54 @@ class UnbanUserHandler:
         return 'success', None
 
 
+class ApproveUserHandler:
+    """Handles requests of the type "approve_user" and of the following form:
+    {
+        "subreddit": "some text",
+        "username": "some text"
+    }
+
+    and returns success/failure.
+    """
+    def __init__(self):
+        self.name = 'approve_user'
+        self.requires_delay = True
+
+    def handle(self, reddit, auth, data):
+        result = reddit.subreddit_friend(
+            data['subreddit'], data['username'], 'contributor', auth
+        )
+        if result.status_code > 299:
+            return result.status_code, None
+        return 'success', None
+
+
+class DisapproveUserHandler:
+    """Handles requests of the type "disapprove_user" and of the following form:
+    {
+        "subreddit": "some text",
+        "username": "some text"
+    }
+
+    and returns success/failure.
+    """
+    def __init__(self):
+        self.name = 'disapprove_user'
+        self.requires_delay = True
+
+    def handle(self, reddit, auth, data):
+        result = reddit.subreddit_unfriend(
+            data['subreddit'], data['username'], 'contributor', auth
+        )
+        if result.status_code > 299:
+            return result.status_code, None
+        return 'success', None
+
+
 def register_handlers(handlers):
     handlers += [
         BanUserHandler(),
-        UnbanUserHandler()
+        UnbanUserHandler(),
+        ApproveUserHandler(),
+        DisapproveUserHandler()
     ]
