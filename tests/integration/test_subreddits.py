@@ -56,7 +56,7 @@ class SubredditsTest(unittest.TestCase):
         body = helper.fetch_one(self, RESPONSE_QUEUE)
 
         self.assertIsInstance(body, dict)
-        self.assertEqual(body.get('uuid'), 'subs-mods-uuid')
+        self.assertEqual(body.get('uuid'), 'sub-mods-uuid')
         self.assertEqual(body.get('type'), 'copy')
         self.assertIsInstance(body.get('info'), dict)
 
