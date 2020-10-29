@@ -61,8 +61,8 @@ class SubredditsTest(unittest.TestCase):
         self.assertIsInstance(body.get('info'), dict)
 
         info = body['info']
-        self.assertIsInstance(body.get('mods'), list)
-        for mod in body['mods']:
+        self.assertIsInstance(info.get('mods'), list)
+        for mod in info['mods']:
             self.assertIsInstance(mod, dict)
             self.assertIsInstance(mod.get('username'), str)
             self.assertIsInstance(mod.get('mod_permissions'), list)
@@ -70,9 +70,9 @@ class SubredditsTest(unittest.TestCase):
                 self.assertIsInstance(mod_perm, str)
 
         expected_mod_unms = frozenset((os.environ['REDDIT_USERNAME'], 'USLBot', 'Tjstretchalot'))
-        sorted_mods = sorted(body.get('mods'), key=lambda x: x['username'])
+        sorted_mods = sorted(info['mods'], key=lambda x: x['username'])
         sorted_expected_mods = [{'username': k, 'mod_permissions': ['all']} for k in sorted(expected_mod_unms)]
-        self.assertEqual(body['mods'], sorted_expected_mods)
+        self.assertEqual(sorted_mods, sorted_expected_mods)
 
 
 if __name__ == '__main__':

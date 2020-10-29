@@ -26,7 +26,7 @@ class SubredditModeratorsHandler:
 
     def handle(self, reddit, auth, data):
         subreddit = data['subreddit']
-        res = reddit.subreddit_moderators(subreddit, auth)
+        result = reddit.subreddit_moderators(subreddit, auth)
         if result.status_code > 299:
             return result.status_code, None
 
