@@ -10,7 +10,7 @@ class ModLogHandler:
         "after": str
     }
 
-    And returns in the following form:
+    And returns in the following form, sorted from oldest to newest
 
     {
         "actions": [
@@ -62,7 +62,7 @@ class ModLogHandler:
                 }
             )
 
-        actions.sort(key=lambda c: -c['created_utc'])
+        actions.sort(key=lambda c: c['created_utc'])
         if data.get('limit'):
             limit = data['limit']
             if len(actions) > limit:
