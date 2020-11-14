@@ -31,5 +31,35 @@ class SubredditLinksListing:
         )
 
 
+class FlairLinkEndpoint:
+    def __init__(self, default_headers):
+        self.name = 'flair_link'
+        self.default_headers = default_headers
+
+    def make_request(self, subreddit, link_fullname, css_class, auth):
+        """Flairs the given link using the given css class identifier.
+
+        :param subreddit: The name of the subreddit in which the link to
+            flair resides.
+        :param link_fullname: The fullname of the link (starting with t3_) to
+            flair.
+        :param css_class: The ID of the CSS class within the subreddit to flair
+            the link with.
+        :param auth: The authorization for the request.
+        """
+        return requests.post(
+            f'https://oauth.reddit.com/r/{subreddit}/api/flair',
+            headers={**self.default_headers, **auth.get_auth_headers()},
+            data={
+                'api_type': 'json',
+                'link': link_fullname,
+                'css_class': css_class
+            }
+        )
+
+
 def register_endpoints(arr, headers):
-    arr += [SubredditLinksListing(headers)]
+    arr += [
+        SubredditLinksListing(headers),
+        FlairLinkEndpoint(headers)
+    ]
