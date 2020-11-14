@@ -96,7 +96,8 @@ class FlairLinkHandler:
     {
         "subreddit": str,
         "link_fullname": str,
-        "css_class": str
+        "css_class": str,
+        "text": str
     }
 
     And returns success/failure.
@@ -109,7 +110,8 @@ class FlairLinkHandler:
         if data.get('limit', 1) < 1:
             return 400, None
         result = reddit.flair_link(
-            data['subreddit'], data.get('link_fullname'), data.get('css_class'), auth)
+            data['subreddit'], data.get('link_fullname'),
+            data.get('css_class'), data.get('text'), auth)
         if result.status_code > 299:
             return result.status_code, None
         return 'success', None

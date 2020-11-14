@@ -36,7 +36,7 @@ class FlairLinkEndpoint:
         self.name = 'flair_link'
         self.default_headers = default_headers
 
-    def make_request(self, subreddit, link_fullname, css_class, auth):
+    def make_request(self, subreddit, link_fullname, css_class, text, auth):
         """Flairs the given link using the given css class identifier.
 
         :param subreddit: The name of the subreddit in which the link to
@@ -45,6 +45,7 @@ class FlairLinkEndpoint:
             flair.
         :param css_class: The ID of the CSS class within the subreddit to flair
             the link with.
+        :param text: The text to associate with the flair.
         :param auth: The authorization for the request.
         """
         return requests.post(
@@ -53,7 +54,8 @@ class FlairLinkEndpoint:
             data={
                 'api_type': 'json',
                 'link': link_fullname,
-                'css_class': css_class
+                'css_class': css_class,
+                'text': text
             }
         )
 
