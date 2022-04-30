@@ -27,7 +27,7 @@ class SubredditCommentsListing:
         return requests.get(
             f'https://oauth.reddit.com/r/{subreddits}/comments',
             headers={**self.default_headers, **auth.get_auth_headers()},
-            data=data
+            params=data
         )
 
 
