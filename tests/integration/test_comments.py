@@ -86,6 +86,70 @@ class CommentsTest(unittest.TestCase):
         # we give some wiggle room because our clock might be off
         self.assertTrue(comment['created_utc'] < time.time() + 10)
 
+    def test_pagination(self):
+        # related to loansboat#59
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'subreddit_comments',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'subreddit-comments-uuid1',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {
+                    'subreddit': ['borrow'],
+                }
+            })
+        )
+        for (
+                method_frame, properties, body_bytes
+        ) in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
+            self.assertIsNotNone(method_frame)
+            self.channel.basic_ack(method_frame.delivery_tag)
+            body = json.loads(body_bytes.decode('utf-8'))
+            break
+
+        self.assertEqual(body.get('status'), 200)
+        self.assertEqual(body.get('type'), 'copy')
+        self.assertEqual(body.get('uuid'), 'subreddit-comments-uuid1')
+
+        comment_fullnames = [c['fullname'] for c in body['info']['comments']]
+        after = body['info']['after']
+        self.assertIn(after, comment_fullnames)
+
+        self.channel.basic_publish(
+            '',
+            QUEUE,
+            json.dumps({
+                'type': 'subreddit_comments',
+                'response_queue': RESPONSE_QUEUE,
+                'uuid': 'subreddit-comments-uuid2',
+                'version_utc_seconds': 1,
+                'sent_at': time.time(),
+                'args': {
+                    'subreddit': ['borrow'],
+                    'after': after
+                }
+            })
+        )
+        for (
+                method_frame, properties, body_bytes
+        ) in self.channel.consume(RESPONSE_QUEUE, inactivity_timeout=60):
+            self.assertIsNotNone(method_frame)
+            self.channel.basic_ack(method_frame.delivery_tag)
+            body = json.loads(body_bytes.decode('utf-8'))
+            break
+
+        self.assertEqual(body.get('status'), 200)
+        self.assertEqual(body.get('type'), 'copy')
+        self.assertEqual(body.get('uuid'), 'subreddit-comments-uuid2')
+
+        after_comment_fullnames = [c['fullname'] for c in body['info']['comments']]
+        self.assertNotEqual(comment_fullnames, after_comment_fullnames)
+        for after_fullname in after_comment_fullnames:
+            self.assertNotIn(after_fullname, comment_fullnames)
+
 
 if __name__ == '__main__':
     unittest.main()
