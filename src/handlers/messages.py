@@ -37,7 +37,11 @@ class InboxHandler:
 
         body = result.json()
 
-        for child in body['data']['children']:
+        for wrapper in body['data']['children']:
+            # A listing's children are {"kind": ..., "data": {...}} wrappers.
+            # Indexing the wrapper directly raises KeyError on the first item, so
+            # this only ever returned a result while the inbox was empty.
+            child = wrapper['data']
             if child['was_comment']:
                 comments.append(
                     {
@@ -52,7 +56,7 @@ class InboxHandler:
                 messages.append(
                     {
                         'fullname': child['name'],
-                        'subject': child['subject'],
+                        'subject': child.get('subject', ''),
                         'body': child['body'],
                         'author': child['author'],
                         'created_utc': child['created_utc']
