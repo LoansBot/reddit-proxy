@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   test_proxy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python_version: [3.8]
@@ -28,15 +28,15 @@ jobs:
           - 5672/tcp
     steps:
     - name: Setup Python ${{ matrix.python_version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python_version }}
     - name: Fetch LoansBot/reddit-proxy
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         path: ./reddit-proxy
     - name: Fetch LoansBot/logging
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         repository: LoansBot/logging
         path: ./logging
@@ -63,7 +63,7 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82,F841,E302,E303,F401,E261 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Fetch LoansBot/database
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         repository: LoansBot/database
         path: ./database
